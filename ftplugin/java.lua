@@ -30,6 +30,19 @@ if type(java_test_jars) == "table" and #java_test_jars > 0 then
   vim.list_extend(bundles, java_test_jars)
 end
 
+-- Story 37.1: IDEA bundled-decompiler parity. The dgileadi/vscode-java-decompiler
+-- lazy plugin (see lua/tetravim/plugins/lsp-java.lua) ships Fernflower/CFR/
+-- Procyon bundle jars under its server/ dir; feeding them to jdtls makes
+-- go-to-definition on a source-less library `.class` open a decompiled buffer.
+-- Paired with `java.contentProvider.preferred = "fernflower"` in lsp-java.lua.
+local decompiler_root = vim.fn.stdpath("data") .. "/lazy/vscode-java-decompiler/server"
+if vim.fn.isdirectory(decompiler_root) == 1 then
+  local decompiler_jars = vim.fn.glob(decompiler_root .. "/*.jar", true, true)
+  if type(decompiler_jars) == "table" and #decompiler_jars > 0 then
+    vim.list_extend(bundles, decompiler_jars)
+  end
+end
+
 local opts = {}
 local lazy_ok, lazy_config = pcall(require, "lazy.core.config")
 if lazy_ok and lazy_config and lazy_config.spec and lazy_config.spec.plugins["nvim-jdtls"] then

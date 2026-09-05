@@ -697,6 +697,7 @@ function M.check()
     { bin = "tailwindcss-language-server", desc = "Tailwind CSS LSP -- class completion" },
     { bin = "emmet-language-server", desc = "Emmet LSP -- abbreviation expansion" },
     { bin = "djlint", desc = "Jinja2 / Django template format + lint" },
+    { bin = "ltex-ls", desc = "Natural-language grammar / style LSP (IDEA 'Grazie')" },
     { bin = "deno", desc = "Deno LSP (runtime-provided; not a Mason package)" },
   }
   for _, s in ipairs(parity_servers) do
@@ -705,6 +706,52 @@ function M.check()
     else
       vim.health.info(string.format("%s: NOT found on $PATH (%s). Suggestion: :MasonToolsInstall", s.bin, s.desc))
     end
+  end
+
+  vim.health.start("TetraVim IDE-Parity Editor Tools (Run / TODO / Structure / History)")
+
+  -- Pure-Lua/Vimscript plugins fetched by lazy.nvim -- no external binary, so
+  -- the probe is just "did the module load". A miss means `:Lazy sync` has
+  -- not run yet. See docs/ide-parity.md ("Editor / IDE tool windows").
+  local editor_plugins = {
+    { mod = "overseer", desc = "Generic task runner (IDEA 'Run Anything' / Run Configurations) -- <leader>r" },
+    { mod = "todo-comments", desc = "TODO / FIXME scanner + list (IDEA 'TODO' tool window) -- ]t / <leader>xt" },
+    { mod = "outline", desc = "Docked symbol tree (IDEA 'Structure') -- <leader>cs" },
+    { mod = "grug-far", desc = "Project-wide find & replace (IDEA 'Replace in Path') -- <leader>sr" },
+    { mod = "marks", desc = "Gutter marks + bookmarks (IDEA 'Bookmarks') -- m* / <leader>m" },
+    { mod = "package-info", desc = "package.json version lens (IDEA npm inlays) -- <leader>cn* in package.json" },
+  }
+  for _, p in ipairs(editor_plugins) do
+    if pcall(require, p.mod) then
+      vim.health.ok(string.format("%s: loaded (%s)", p.mod, p.desc))
+    else
+      vim.health.info(string.format("%s: not loaded (%s). Suggestion: :Lazy sync", p.mod, p.desc))
+    end
+  end
+
+  -- undotree is Vimscript-only (no Lua module); probe the command it defines.
+  if vim.fn.exists(":UndotreeToggle") == 2 then
+    vim.health.ok("undotree: available (persistent undo timeline / IDEA 'Local History') -- <leader>uu")
+  else
+    vim.health.info("undotree: not loaded (IDEA 'Local History'). Suggestion: :Lazy sync")
+  end
+
+  -- jdtls decompiler bundle -- IDEA bundled decompiler parity. Ships as jars
+  -- under the dgileadi/vscode-java-decompiler lazy plugin; ftplugin/java.lua
+  -- globs them into the jdtls bundle list.
+  local decompiler_root = vim.fn.stdpath("data") .. "/lazy/vscode-java-decompiler/server"
+  local decompiler_jars = vim.fn.isdirectory(decompiler_root) == 1
+      and vim.fn.glob(decompiler_root .. "/*.jar", true, true)
+    or {}
+  if type(decompiler_jars) == "table" and #decompiler_jars > 0 then
+    vim.health.ok(
+      string.format(
+        "vscode-java-decompiler: %d bundle jar(s) -> jdtls (decompile source-less .class)",
+        #decompiler_jars
+      )
+    )
+  else
+    vim.health.info("vscode-java-decompiler: no bundle jars found. Suggestion: :Lazy sync")
   end
 end
 

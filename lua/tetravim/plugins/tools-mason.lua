@@ -65,6 +65,9 @@ local ensure_installed = {
   "prisma-language-server",
   -- Markdown editing intelligence (bundled Markdown plugin).
   "marksman",
+  -- Natural-language grammar / spelling / style for prose in Markdown, LaTeX,
+  -- rST, plain text and commit messages (IDEA ships this via Grazie).
+  "ltex-ls",
   -- Jinja2 / Django template format + lint (bundled template-engine support).
   "djlint",
 }

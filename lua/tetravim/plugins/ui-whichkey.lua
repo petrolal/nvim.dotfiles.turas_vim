@@ -44,6 +44,8 @@ return {
         { "<leader>xs", group = "sonar", icon = "󰒃 " },
         { "<leader>xv", group = "cve/vulns", icon = "󰒃 " },
         { "<leader>u", group = "ui/toggles", icon = "󰔡 " },
+        { "<leader>r", group = "run/tasks", icon = "󱓞 " },
+        { "<leader>m", group = "marks/bookmarks", icon = "󰃀 " },
         { "<leader>q", group = "quit/session", icon = "󰗼 " },
       })
       -- Per-language <leader>c* subgroups (Maven/Gradle, Terraform,

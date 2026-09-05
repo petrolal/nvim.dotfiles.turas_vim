@@ -90,6 +90,29 @@ H2, …). Datasource auto-discovery from Spring `application.*` is
 | Terraform | 🔷 `cloud-terraform.lua` |
 | Database tools | 🔷 `tools-dadbod.lua` + `lsp-sql.lua` |
 
+## Editor / IDE tool windows
+
+The panels and actions IDEA exposes around the editor itself — not a language
+server, a workflow.
+
+| IDEA feature | tetravim | Keys |
+| --- | --- | --- |
+| Run Anything / Run Configurations (arbitrary commands, `tasks.json`, npm scripts) | 🔷 `tools-tasks.lua` → overseer.nvim | `<leader>r` |
+| TODO tool window | 🔷 `editor-todo-comments.lua` → todo-comments.nvim | `]t` / `[t`, `<leader>xt`, `<leader>st` |
+| Structure tool window (docked symbol tree) | 🔷 `editor-outline.lua` → outline.nvim | `<leader>cs` |
+| Replace in Path (interactive project-wide replace) | 🔷 `editor-search-replace.lua` → grug-far.nvim | `<leader>sr` / `<leader>sR` / `<leader>sF` |
+| Local History | 🔷 `editor-undotree.lua` → undotree + persistent `undofile` | `<leader>uu` |
+| Bookmarks (mnemonic, gutter, list) | 🔷 `editor-marks.lua` → marks.nvim | `m*`, `<leader>m`, `<leader>sm` |
+| Grazie (grammar / spell / style for prose) | 🔷 `lsp-markdown.lua` → `ltex-ls` | via `<leader>ca` |
+| Bundled decompiler (source-less library `.class`) | 🔷 `lsp-java.lua` + `ftplugin/java.lua` → `dgileadi/vscode-java-decompiler` jars in the jdtls bundle list | `gd` |
+| npm dependency version inlays in `package.json` | 🔷 `lang-npm.lua` → package-info.nvim | `<leader>cn*` (buffer-local in `package.json`) |
+| Run with Coverage | 🔷 native `tetravim.util.coverage` (JaCoCo XML overlay) | `<leader>jc*` |
+
+`nvim-coverage` was deliberately **not** added: the distro already ships a
+native JaCoCo coverage engine (`lua/tetravim/util/coverage.lua`, wired to
+`<leader>jc*`). To gain lcov/cobertura support for Python/JS later, extend that
+module's parser rather than layering a second, competing plugin.
+
 ## Install
 
 All servers/tools are in `tools-mason.lua`'s `ensure_installed` and are fetched

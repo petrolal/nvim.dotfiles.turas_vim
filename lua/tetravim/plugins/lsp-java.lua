@@ -9,6 +9,17 @@ return {
   },
 
   {
+    -- jdtls decompiler bundle -- IntelliJ IDEA bundled decompiler parity.
+    -- With this jar in the jdtls `bundles` list (globbed in ftplugin/java.lua)
+    -- plus `java.contentProvider.preferred = "fernflower"` in the settings
+    -- below, go-to-definition on a library `.class` that ships no sources
+    -- opens a Fernflower-decompiled buffer instead of a "no source" error.
+    -- Pure jars, no build step -- lazy just needs it cloned to disk.
+    "dgileadi/vscode-java-decompiler",
+    lazy = true,
+  },
+
+  {
     "mfussenegger/nvim-jdtls",
     ft = { "java" },
     config = function(_, opts)

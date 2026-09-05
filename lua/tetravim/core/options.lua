@@ -40,6 +40,13 @@ vim.opt.cursorline = true
 vim.opt.scrolloff = 6
 vim.opt.sidescrolloff = 8
 
+-- Persistent undo: keep the full undo tree on disk so it survives a restart.
+-- This is what turns undotree (editor-undotree.lua) into a real "Local
+-- History" -- time-travel through past edits of a file days later, not just
+-- within the current session.
+vim.opt.undofile = true
+vim.opt.undolevels = 10000
+
 -- Cleaner chrome: drop the "~" end-of-buffer tildes and give folds /
 -- vertical splits softer glyphs than the default ASCII.
 vim.opt.fillchars = {
