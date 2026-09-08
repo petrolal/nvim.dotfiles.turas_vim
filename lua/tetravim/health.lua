@@ -843,6 +843,10 @@ function M.check()
     { mod = "grug-far", desc = "Project-wide find & replace (IDEA 'Replace in Path') -- <leader>sr" },
     { mod = "marks", desc = "Gutter marks + bookmarks (IDEA 'Bookmarks') -- m* / <leader>m" },
     { mod = "package-info", desc = "package.json version lens (IDEA npm inlays) -- <leader>cn* in package.json" },
+    {
+      mod = "neogen",
+      desc = "Javadoc / KDoc / docstring stub generator (IDEA 'Generate... > Javadoc') -- <leader>cg / <leader>cG",
+    },
   }
   for _, p in ipairs(editor_plugins) do
     if pcall(require, p.mod) then
