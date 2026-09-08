@@ -57,7 +57,7 @@ local ok, err = pcall(function()
 
   local keymaps_src = io.open('lua/tetravim/core/keymaps.lua', 'r'):read('*a')
   -- <leader>x keys are grouped by feature type, each with a buffer + project variant.
-  for _, k in ipairs({ 'xdb', 'xdp', 'xlb', 'xlB', 'xlp', 'xlP', 'xsb', 'xsp', 'xvb', 'xvp', 'xvc' }) do
+  for _, k in ipairs({ 'xdb', 'xdp', 'xlb', 'xlf', 'xlp', 'xlF', 'xsb', 'xsp', 'xvb', 'xvp', 'xvc' }) do
     assert(keymaps_src:match('map%(.-<leader>' .. k .. '[\"\\']'), 'keymaps.lua must bind <leader>' .. k)
   end
 
@@ -191,7 +191,7 @@ local ok, err = pcall(function()
     for _, m in ipairs(maps) do if m.lhs:match(suffix .. '\$') then return m end end
     return nil
   end
-  for _, s in ipairs({ 'xdb', 'xdp', 'xlb', 'xlB', 'xlp', 'xlP', 'xsb', 'xsp', 'xvb', 'xvp', 'xvc' }) do
+  for _, s in ipairs({ 'xdb', 'xdp', 'xlb', 'xlf', 'xlp', 'xlF', 'xsb', 'xsp', 'xvb', 'xvp', 'xvc' }) do
     assert(find(s), '<leader>' .. s .. ' keymap missing')
   end
 

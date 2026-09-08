@@ -228,7 +228,7 @@ function M.lint_now(buf)
 end
 
 -- ---------------------------------------------------------------------------
--- Buffer-scoped autofix (<leader>xlB)
+-- Buffer-scoped autofix (<leader>xlf)
 -- ---------------------------------------------------------------------------
 --
 -- The per-language autofix argv for a SINGLE file -- the buffer-scoped twin of
@@ -264,7 +264,7 @@ function M.fix_now(buf)
 
   if not build then
     ui.notify_warn(
-      ("No buffer autofix tool for filetype '%s' -- <leader>xlP runs a project-wide pass"):format(
+      ("No buffer autofix tool for filetype '%s' -- <leader>xlF runs a project-wide pass"):format(
         ft ~= "" and ft or "(none)"
       )
     )
@@ -302,7 +302,7 @@ function M.fix_now(buf)
 end
 
 -- ---------------------------------------------------------------------------
--- Project-wide lint check / fix (<leader>xlp / <leader>xlP)
+-- Project-wide lint check / fix (<leader>xlp / <leader>xlF)
 -- ---------------------------------------------------------------------------
 --
 -- nvim-lint and conform are buffer-scoped; "lint the whole repo" means

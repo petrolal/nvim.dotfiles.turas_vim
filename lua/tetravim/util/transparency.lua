@@ -52,18 +52,26 @@ function M.apply()
   end
 end
 
---- Flip transparency on/off. Re-applies the base Tetris palette first so
---- switching *off* restores the opaque surfaces, then re-blanks if the new
---- state is "on".
-function M.toggle()
-  M.enabled = not M.enabled
+--- Drive transparency to an explicit state (no notification). Re-applies the
+--- base Tetris palette first so switching *off* restores the opaque surfaces,
+--- then re-blanks if the new state is "on". `M.toggle` and the `<leader>ut`
+--- Snacks toggle both route through here.
+function M.set(enabled)
+  if enabled == M.enabled then
+    return
+  end
+  M.enabled = enabled
 
   local ok, theme = pcall(require, "tetravim.theme")
   if ok then
     theme.apply()
   end
   M.apply()
+end
 
+--- Flip transparency on/off and announce the new state.
+function M.toggle()
+  M.set(not M.enabled)
   vim.notify("Transparency " .. (M.enabled and "ON" or "OFF"), vim.log.levels.INFO)
 end
 

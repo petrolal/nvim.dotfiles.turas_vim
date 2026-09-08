@@ -396,32 +396,11 @@ map("n", "<leader>agf", function()
   conform.format({ bufnr = 0, async = false, lsp_fallback = true })
 end, { desc = "Format .proto Buffer (buf)" })
 
--- Autoformat toggle (Story 34.2): <leader>uf toggles for the current
--- buffer only, <leader>uF toggles the global default
-map("n", "<leader>uf", function()
-  require("tetravim.util.format").toggle(true)
-end, { desc = "Toggle Autoformat (Buffer)" })
-map("n", "<leader>uF", function()
-  require("tetravim.util.format").toggle(false)
-end, { desc = "Toggle Autoformat (Global)" })
-
--- Auto-lint toggle: <leader>ul toggles for the current buffer only,
--- <leader>uL toggles the global default. Gates nvim-lint's on-save /
--- on-enter passes (checkstyle for Java, ktlint for Kotlin, tflint,
--- cfn-lint, hadolint...). See lua/tetravim/util/lint.lua.
-map("n", "<leader>ul", function()
-  require("tetravim.util.lint").toggle(true)
-end, { desc = "Toggle Autolint (Buffer)" })
-map("n", "<leader>uL", function()
-  require("tetravim.util.lint").toggle(false)
-end, { desc = "Toggle Autolint (Global)" })
-
--- Background transparency toggle: blanks the editor / float surfaces so a
--- translucent terminal shows through, restores the Tetris surfaces on the
--- way back.
-map("n", "<leader>ut", function()
-  require("tetravim.util.transparency").toggle()
-end, { desc = "Toggle Transparency" })
+-- State toggles under <leader>u -- autoformat (uf buffer / uF global),
+-- autolint (ul buffer / uL global) and background transparency (ut) -- are
+-- registered as Snacks.toggle instances in the config() of
+-- lua/tetravim/plugins/editor-snacks.lua, so which-key shows their live
+-- on/off state. util/format, util/lint and util/transparency hold the logic.
 
 -- Universal File Operations: Save, Save All, Save As (Epic 33)
 local function save_current_file()
@@ -478,13 +457,14 @@ vim.api.nvim_create_user_command("NewFromTemplate", new_file_from_template, {
 -- pure async shell-out to `osv-scanner` in tetravim.util.cve whose findings
 -- are published as buffer diagnostics on the offending dependency lines.
 --
--- Keys are grouped by feature type, and within each type the lowercase key is
--- the current-buffer action and the "p" key (or uppercase for a destructive
--- write) is the whole-project action:
+-- Keys are grouped by feature type. Within each type "b" is the current-buffer
+-- action and "p" is the whole-project action, so Shift always just means
+-- "widen from buffer to project". Lint's file-writing "fix" pass is a separate
+-- letter ("f" buffer / "F" project) rather than a Shifted "check":
 --
 --   <leader>xd  diagnostics : xdb line float        | xdp project quickfix
 --   <leader>xl  lint        : xlb buffer check      | xlp project check
---                             xlB buffer autofix    | xlP project autofix
+--                             xlf buffer fix        | xlF project fix
 --   <leader>xs  sonar       : xsb buffer rule desc  | xsp project scan
 --   <leader>xv  cve         : xvb build-file scan   | xvp project scan
 --                             xvc clear diagnostics
@@ -502,20 +482,20 @@ end, { desc = "All Project (Quickfix)" })
 -- Buffer: lint / autofix the current file (ignores the <leader>ul autolint
 -- toggle). Project: shell out to each stack's own CLI (ktlint,
 -- npm-groovy-lint, checkstyle, google-java-format, scalafmt) over the whole
--- repo and render a combined report in a persistent split. The uppercase
+-- repo and render a combined report in a persistent split. The "f"/"F" fix
 -- variants rewrite files in place, then reload the affected buffers.
 map("n", "<leader>xlb", function()
   require("tetravim.util.lint").lint_now()
 end, { desc = "Check Buffer" })
-map("n", "<leader>xlB", function()
-  require("tetravim.util.lint").fix_now()
-end, { desc = "Autofix Buffer (writes file)" })
 map("n", "<leader>xlp", function()
   require("tetravim.util.lint").project_run("check")
 end, { desc = "Check All Code (Project)" })
-map("n", "<leader>xlP", function()
+map("n", "<leader>xlf", function()
+  require("tetravim.util.lint").fix_now()
+end, { desc = "Fix Buffer (writes file)" })
+map("n", "<leader>xlF", function()
   require("tetravim.util.lint").project_run("fix")
-end, { desc = "Autofix All Code (Project)" })
+end, { desc = "Fix All Code (Project)" })
 
 -- --- Sonar -------------------------------------------------------------
 -- Buffer: SonarLint analyzes java/kotlin/scala buffers automatically via the

@@ -1,7 +1,7 @@
 -- Unit tests for tetravim.util.lint.fix_now / buffer_fix_argv (Epic 6).
 --
 -- `fix_now` is the buffer-scoped twin of `project_run("fix")` wired to
--- `<leader>xlB`: it rewrites the current buffer's file in place with the
+-- `<leader>xlf`: it rewrites the current buffer's file in place with the
 -- language's own formatter. `vim.system` is always monkeypatched -- no real
 -- binary is ever spawned.
 

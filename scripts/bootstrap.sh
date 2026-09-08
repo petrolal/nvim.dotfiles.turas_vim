@@ -287,7 +287,7 @@ echo ""
 
 section "Scala lint & format tools (scalafmt / scalastyle)"
 # Not in the Mason registry -- installed via Coursier when available. Metals
-# still provides semantic diagnostics without these; they add `<leader>xlP`
+# still provides semantic diagnostics without these; they add `<leader>xlF`
 # project formatting and optional style linting.
 if command -v cs > /dev/null 2>&1 || command -v coursier > /dev/null 2>&1; then
 	CS="$(command -v cs 2>/dev/null || command -v coursier)"

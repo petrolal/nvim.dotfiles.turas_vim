@@ -187,6 +187,76 @@ return {
       vim.notify = function(msg, level, notify_opts)
         Snacks.notifier.notify(msg, level, notify_opts)
       end
+
+      -- State toggles under <leader>u. Snacks.toggle gives each one a
+      -- get/set-backed on/off notification and, via which-key, a filled/empty
+      -- icon that mirrors the live state -- so these replace the hand-rolled
+      -- vim.keymap.set + vim.notify blocks that used to sit in
+      -- core/keymaps.lua. The buffer-scoped pair reads the *effective* state
+      -- (buffer override, else global) and writes only vim.b; the global pair
+      -- writes vim.g and clears the buffer override so it stops shadowing.
+      Snacks.toggle
+        .new({
+          id = "tetravim_autoformat_buffer",
+          name = "Autoformat (Buffer)",
+          get = function()
+            return require("tetravim.util.format").enabled(0)
+          end,
+          set = function(state)
+            vim.b.autoformat = state
+          end,
+        })
+        :map("<leader>uf")
+      Snacks.toggle
+        .new({
+          id = "tetravim_autoformat_global",
+          name = "Autoformat (Global)",
+          get = function()
+            return vim.g.autoformat ~= false
+          end,
+          set = function(state)
+            vim.g.autoformat = state
+            vim.b.autoformat = nil
+          end,
+        })
+        :map("<leader>uF")
+      Snacks.toggle
+        .new({
+          id = "tetravim_autolint_buffer",
+          name = "Autolint (Buffer)",
+          get = function()
+            return require("tetravim.util.lint").enabled(0)
+          end,
+          set = function(state)
+            vim.b.autolint = state
+          end,
+        })
+        :map("<leader>ul")
+      Snacks.toggle
+        .new({
+          id = "tetravim_autolint_global",
+          name = "Autolint (Global)",
+          get = function()
+            return vim.g.autolint ~= false
+          end,
+          set = function(state)
+            vim.g.autolint = state
+            vim.b.autolint = nil
+          end,
+        })
+        :map("<leader>uL")
+      Snacks.toggle
+        .new({
+          id = "tetravim_transparency",
+          name = "Transparency",
+          get = function()
+            return require("tetravim.util.transparency").enabled
+          end,
+          set = function(state)
+            require("tetravim.util.transparency").set(state)
+          end,
+        })
+        :map("<leader>ut")
     end,
     keys = {
       {

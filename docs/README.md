@@ -53,7 +53,7 @@ whole project:
 | Type | Buffer | Project |
 | --- | --- | --- |
 | Diagnostics | `<leader>xdb` line float | `<leader>xdp` all diagnostics → quickfix |
-| Lint | `<leader>xlb` check · `<leader>xlB` autofix (writes file) | `<leader>xlp` check · `<leader>xlP` autofix |
+| Lint | `<leader>xlb` check · `<leader>xlf` autofix (writes file) | `<leader>xlp` check · `<leader>xlF` autofix |
 | Sonar | `<leader>xsb` rule description under cursor | `<leader>xsp` whole-codebase scan |
 | CVE | `<leader>xvb` scan open build file · `<leader>xvc` clear | `<leader>xvp` scan whole project |
 

@@ -561,7 +561,7 @@ function M.check()
 
   -- Scala: Metals already provides semantic diagnostics; scalastyle is the
   -- optional style linter (not in Mason -- install via coursier) and needs a
-  -- rules file, scalafmt is the formatter used by conform + <leader>xlP.
+  -- rules file, scalafmt is the formatter used by conform + <leader>xlF.
   local tvlint_ok, tvlint = pcall(require, "tetravim.util.lint")
   if vim.fn.executable("scalastyle") == 1 then
     local cfg = tvlint_ok and tvlint.scalastyle_config() or nil
@@ -578,19 +578,19 @@ function M.check()
     )
   end
   if vim.fn.executable("scalafmt") == 1 then
-    vim.health.ok("scalafmt: installed and executable (Scala formatting via conform + <leader>xlP)")
+    vim.health.ok("scalafmt: installed and executable (Scala formatting via conform + <leader>xlF)")
   else
     vim.health.info(
       "scalafmt: NOT found on $PATH (Scala falls back to Metals LSP formatting). Suggestion: coursier install scalafmt"
     )
   end
 
-  -- Buffer autofix <leader>xlB / project-wide <leader>xlp (check) / <leader>xlP (fix)
+  -- Buffer autofix <leader>xlf / project-wide <leader>xlp (check) / <leader>xlF (fix)
   if tvlint_ok and type(tvlint.project_plan) == "function" then
     local can_check = #tvlint.project_plan("check")
     local can_fix = #tvlint.project_plan("fix")
     vim.health.ok(
-      ("Project lint: <leader>xlp can run %d checker(s), <leader>xlP can run %d fixer(s) in this repo"):format(
+      ("Project lint: <leader>xlp can run %d checker(s), <leader>xlF can run %d fixer(s) in this repo"):format(
         can_check,
         can_fix
       )
@@ -599,7 +599,7 @@ function M.check()
       local fts = vim.tbl_keys(tvlint.buffer_fix_argv)
       table.sort(fts)
       vim.health.ok(
-        ("Buffer autofix: <leader>xlB rewrites the current file for filetype(s) %s"):format(table.concat(fts, ", "))
+        ("Buffer autofix: <leader>xlf rewrites the current file for filetype(s) %s"):format(table.concat(fts, ", "))
       )
     end
   end
