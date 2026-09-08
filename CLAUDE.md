@@ -36,6 +36,7 @@ bash scripts/validate-db.sh            # dadbod DB explorer
 bash scripts/validate-http.sh          # kulala HTTP client + OpenAPI
 bash scripts/validate-dap-jvm.sh       # JVM DAP debugger
 bash scripts/validate-devops.sh        # Terraform/CFN/Ansible root discovery
+bash scripts/validate-filetemplate.sh  # "New File from Template" (IDEA-style New)
 # ...see scripts/ for the rest
 
 # Lua test suite (plenary busted)
@@ -71,7 +72,7 @@ file returns a lazy.nvim spec (single spec table or a list of them). `defaults.l
 | --- | --- |
 | `lua/tetravim/core/` | Editor bootstrap: options, global keymaps, autocmds, diagnostics, health JSON, devops keymap engine, `lang-keymaps` |
 | `lua/tetravim/plugins/` | One lazy.nvim spec file per concern. Prefixes: `lsp-*`, `tools-*`, `editor-*`, `ui-*`, `cloud-*`, `core-*` |
-| `lua/tetravim/util/` | Pure Lua logic modules (`jvm`, `spring`, `refactor`, `extract`, `db`, `http`, `grpc`, `cve`, `sonar`, `forge`, `lsp_async`, `lsp_resilience`, `format`, `git`, `maven`, `gradle`, …). Keymaps call into these; business logic lives here, not in the keymap files |
+| `lua/tetravim/util/` | Pure Lua logic modules (`jvm`, `spring`, `refactor`, `extract`, `filetemplate`, `db`, `http`, `grpc`, `cve`, `sonar`, `forge`, `lsp_async`, `lsp_resilience`, `format`, `git`, `maven`, `gradle`, …). Keymaps call into these; business logic lives here, not in the keymap files |
 | `lua/tetravim/theme/` | `tetris.lua` = canonical palette + highlight table; `init.lua` = loader/persistence shim |
 | `colors/tetravim.lua` | `:colorscheme tetravim` entry point |
 | `lua/tetravim/tests/` | `*_spec.lua` plenary busted specs |

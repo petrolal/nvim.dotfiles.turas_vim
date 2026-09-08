@@ -205,6 +205,13 @@ vim.api.nvim_create_autocmd("BufNewFile", {
   end,
 })
 
+-- Offer a file-type skeleton when a brand-new empty file of a recognised type
+-- is opened (VSCode-style "suggest an initial template"). Prompts via
+-- vim.ui.select; a "(no template)" entry always lets you decline, and it never
+-- overwrites content an earlier hook (e.g. the Java skeleton above) inserted.
+-- Disable entirely with `vim.g.tetravim_new_file_prompt = false`.
+require("tetravim.util.filetemplate").setup_new_file_prompt()
+
 -- Native LSP CodeLens auto-refresh for Java & Kotlin buffers
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {
   group = augroup("lsp_codelens"),

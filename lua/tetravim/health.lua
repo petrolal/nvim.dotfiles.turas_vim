@@ -677,6 +677,36 @@ function M.check()
     vim.health.info("gradle: NOT found on $PATH (optional -- needed for Gradle init generator)")
   end
 
+  vim.health.start("TetraVim New File from Template (IDEA-style New)")
+
+  do
+    local ok, ft = pcall(require, "tetravim.util.filetemplate")
+    if not ok then
+      vim.health.error("tetravim.util.filetemplate: failed to load (" .. tostring(ft) .. ")")
+    else
+      vim.health.ok(
+        ("built-in templates: %d registered (Java / Kotlin / Scala / Groovy / Web / DevOps / ...)"):format(
+          ft.builtin_count()
+        )
+      )
+      local udir = ft.user_dir()
+      if vim.fn.isdirectory(udir) == 1 then
+        local n = vim.tbl_count(ft.load_user_templates())
+        vim.health.ok(("user templates: %d found in %s"):format(n, udir))
+      else
+        vim.health.info(
+          "user templates: none -- drop files into " .. udir .. " to add your own (one file per template)"
+        )
+      end
+      vim.health.info("keys: <leader>fn / <leader>n / :TetraVimNewFile")
+      if vim.g.tetravim_new_file_prompt == false then
+        vim.health.info("new-file skeleton prompt: disabled (vim.g.tetravim_new_file_prompt = false)")
+      else
+        vim.health.ok("new-file skeleton prompt: on -- opening a new empty file of a known type offers a template")
+      end
+    end
+  end
+
   vim.health.start("TetraVim IDE-Parity Language Servers (Python / SQL / Web / Templates)")
 
   -- Executable names as exposed on $PATH once Mason installs each package

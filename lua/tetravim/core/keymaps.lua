@@ -454,6 +454,21 @@ map("n", "<leader>fS", function()
   end)
 end, { desc = "Save As..." })
 
+-- New File from Template: IntelliJ IDEA Ultimate "New > Java Class / Kotlin
+-- Class / HTML File / ..." parity. Context-aware picker; JVM package derived
+-- from the target directory's position under a source root.
+local function new_file_from_template()
+  require("tetravim.util.filetemplate").new_file()
+end
+map("n", "<leader>fn", new_file_from_template, { desc = "New File from Template" })
+map("n", "<leader>n", new_file_from_template, { desc = "New File from Template" })
+vim.api.nvim_create_user_command("TetraVimNewFile", new_file_from_template, {
+  desc = "Create a file from a template (IDEA-style New)",
+})
+vim.api.nvim_create_user_command("NewFromTemplate", new_file_from_template, {
+  desc = "Create a file from a template (IDEA-style New)",
+})
+
 -- ==============================================================================
 -- 󰒃 Code Quality & Security Suite (<leader>x) - Epic 6
 -- ==============================================================================
