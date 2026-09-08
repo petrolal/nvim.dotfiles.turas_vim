@@ -627,11 +627,10 @@ function M.setup_keymaps()
     require("tetravim.util.project-wizard").create_project()
   end, { desc = "Open TetraVim New JVM Project Wizard" })
 
-  -- Dynamic WhichKey registration if already loaded
-  local ok, wk = pcall(require, "which-key")
-  if ok and wk.add then
-    pcall(wk.add, M.whichkey_spec())
-  end
+  -- WhichKey group specs are registered once, by the aggregator
+  -- (plugins/ui-whichkey.lua) via require("tetravim.util.jvm").whichkey_spec().
+  -- This module deliberately does not register them itself, so there is a
+  -- single registration path and no hand-synced duplicate list.
 end
 
 --- Locate Java 21 JDK installation path across common system locations and SDKMAN

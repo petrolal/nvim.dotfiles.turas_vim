@@ -387,7 +387,7 @@ else
   echo "[10/14] SKIP: jq not installed in this environment -- syntax-error functional check skipped gracefully."
 fi
 
-echo "[11/14] Functional: <leader>H keymaps (run request, generate from OpenAPI, jq-filter) are registered by keymaps.lua..."
+echo "[11/14] Functional: <leader>ah keymaps (run request, generate from OpenAPI, jq-filter) are registered by keymaps.lua..."
 nvim -u init.lua --headless -c "lua
 local ok, err = pcall(function()
   require('tetravim.core.keymaps')
@@ -398,28 +398,28 @@ local ok, err = pcall(function()
     end
     return nil
   end
-  assert(find('Hr'), '<leader>Hr (run request) keymap missing')
-  assert(find('Ho'), '<leader>Ho (generate from OpenAPI) keymap missing')
-  assert(find('Hj'), '<leader>Hj (jq-filter) keymap missing')
+  assert(find('ahr'), '<leader>ahr (run request) keymap missing')
+  assert(find('aho'), '<leader>aho (generate from OpenAPI) keymap missing')
+  assert(find('ahj'), '<leader>ahj (jq-filter) keymap missing')
 end)
 if not ok then
   io.stderr:write('FAIL: ' .. tostring(err) .. '\n')
   vim.cmd('cquit 1')
 else
-  print('OK: <leader>H keymap group registered (run/generate/jq-filter)')
+  print('OK: <leader>ah keymap group registered (run/generate/jq-filter)')
 end
 " -c "qa!"
 
-echo "[12/14] Functional: <leader>Ho's actual callback (not just its existence) generates .http content into a real, non-floating split with filetype=http..."
+echo "[12/14] Functional: <leader>aho's actual callback (not just its existence) generates .http content into a real, non-floating split with filetype=http..."
 nvim -u init.lua --headless -c "lua
 local ok, err = pcall(function()
   require('tetravim.core.keymaps')
   local maps = vim.api.nvim_get_keymap('n')
   local ho = nil
   for _, m in ipairs(maps) do
-    if m.lhs:match('Ho\$') then ho = m end
+    if m.lhs:match('aho\$') then ho = m end
   end
-  assert(ho and type(ho.callback) == 'function', '<leader>Ho keymap has no callback function')
+  assert(ho and type(ho.callback) == 'function', '<leader>aho keymap has no callback function')
 
   -- Monkeypatch vim.ui.input (same style already used above for vim.notify /
   -- vim.fn.executable) to auto-supply the fixture spec path instead of
@@ -433,7 +433,7 @@ local ok, err = pcall(function()
 
   vim.ui.input = orig_input
 
-  assert(#vim.api.nvim_list_wins() > win_count_before, '<leader>Ho must open a new window')
+  assert(#vim.api.nvim_list_wins() > win_count_before, '<leader>aho must open a new window')
   local win = vim.api.nvim_get_current_win()
   local cfg = vim.api.nvim_win_get_config(win)
   assert(cfg.relative == '', 'result window must be a real split, not floating (relative=' .. vim.inspect(cfg.relative) .. ')')
@@ -447,21 +447,21 @@ if not ok then
   io.stderr:write('FAIL: ' .. tostring(err) .. '\n')
   vim.cmd('cquit 1')
 else
-  print('OK: <leader>Ho callback opened a real split (filetype=http) with the generated .http content')
+  print('OK: <leader>aho callback opened a real split (filetype=http) with the generated .http content')
 end
 " -c "qa!"
 
 if [ "$JQ_AVAILABLE" -eq 1 ]; then
-  echo "[13/14] Functional: <leader>Hj's actual callback (not just its existence) jq-filters the current buffer into a real, non-floating split..."
+  echo "[13/14] Functional: <leader>ahj's actual callback (not just its existence) jq-filters the current buffer into a real, non-floating split..."
   nvim -u init.lua --headless -c "lua
   local ok, err = pcall(function()
     require('tetravim.core.keymaps')
     local maps = vim.api.nvim_get_keymap('n')
     local hj = nil
     for _, m in ipairs(maps) do
-      if m.lhs:match('Hj\$') then hj = m end
+      if m.lhs:match('ahj\$') then hj = m end
     end
-    assert(hj and type(hj.callback) == 'function', '<leader>Hj keymap has no callback function')
+    assert(hj and type(hj.callback) == 'function', '<leader>ahj keymap has no callback function')
 
     vim.cmd('enew')
     vim.api.nvim_buf_set_lines(0, 0, -1, false, { '{\"a\":1,\"b\":2}' })
@@ -476,7 +476,7 @@ if [ "$JQ_AVAILABLE" -eq 1 ]; then
 
     vim.ui.input = orig_input
 
-    assert(#vim.api.nvim_list_wins() > win_count_before, '<leader>Hj must open a new window')
+    assert(#vim.api.nvim_list_wins() > win_count_before, '<leader>ahj must open a new window')
     local win = vim.api.nvim_get_current_win()
     local cfg = vim.api.nvim_win_get_config(win)
     assert(cfg.relative == '', 'result window must be a real split, not floating (relative=' .. vim.inspect(cfg.relative) .. ')')
@@ -489,11 +489,11 @@ if [ "$JQ_AVAILABLE" -eq 1 ]; then
     io.stderr:write('FAIL: ' .. tostring(err) .. '\n')
     vim.cmd('cquit 1')
   else
-    print('OK: <leader>Hj callback opened a real split with the jq-filtered result')
+    print('OK: <leader>ahj callback opened a real split with the jq-filtered result')
   end
   " -c "qa!"
 else
-  echo "[13/14] SKIP: jq not installed in this environment -- <leader>Hj end-to-end check skipped gracefully."
+  echo "[13/14] SKIP: jq not installed in this environment -- <leader>ahj end-to-end check skipped gracefully."
 fi
 
 echo "[14/14] Functional: ftplugin/http.lua applies buffer-local settings to a .http buffer..."
@@ -530,7 +530,7 @@ echo ""
 echo "NOT covered by this script (requires a live kulala-core backend /"
 echo "real network request, unavailable in this sandbox) -- verify manually"
 echo "per spec-3-2's Verification section:"
-echo "  - <leader>Hr actually executing a request against a live endpoint and"
+echo "  - <leader>ahr actually executing a request against a live endpoint and"
 echo "    kulala.nvim rendering the response in a persistent split"
 echo "  - kulala-core's first-run auto-download (triggered by its own setup())"
-echo "  - <leader>Ho / <leader>Hj end-to-end through vim.ui.input in a real UI"
+echo "  - <leader>aho / <leader>ahj end-to-end through vim.ui.input in a real UI"

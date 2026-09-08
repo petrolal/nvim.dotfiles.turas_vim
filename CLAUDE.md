@@ -88,7 +88,8 @@ There are four registration channels, deliberately layered so `<leader>` groups
 only show keys relevant to the current buffer:
 
 1. **Global** — `core/keymaps.lua` (`<leader>c` code/LSP, `<leader>w` windows,
-   `<leader>H` HTTP, `<leader>G` gRPC, `<leader>x` quality/security, file ops).
+   `<leader>a` API/data clients — `<leader>ah` HTTP, `<leader>ag` gRPC, `<leader>ad`
+   database — `<leader>x` quality/security, file ops).
 2. **JVM platform** — `<leader>j`, registered unconditionally via
    `require("tetravim.util.jvm").setup_keymaps()`.
 3. **DevOps/infra** — `<leader>o`, registered globally via

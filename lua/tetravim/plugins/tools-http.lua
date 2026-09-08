@@ -6,8 +6,8 @@
 -- This file only wires the plugin up; the custom pieces this story adds
 -- (OpenAPI-spec-to-.http generation, jq response filtering) live in
 -- tetravim.util.openapi / tetravim.util.http and are driven from the
--- <leader>H keymap group in core/keymaps.lua -- mirroring how
--- tools-dadbod.lua owns only the plugin spec while <leader>D's actual
+-- <leader>ah keymap group in core/keymaps.lua -- mirroring how
+-- tools-dadbod.lua owns only the plugin spec while <leader>ad's actual
 -- keymaps live in keymaps.lua.
 
 return {
@@ -15,7 +15,7 @@ return {
     "mistweaverco/kulala.nvim",
     -- kulala.nvim shells out to `curl` as its actual request backend (it
     -- builds a curl invocation from each .http block), so `curl` must be on
-    -- $PATH for <leader>Hr to work -- see the :checkhealth entry in
+    -- $PATH for <leader>ahr to work -- see the :checkhealth entry in
     -- lua/tetravim/health.lua.
     -- Lazy-load on .http buffers only -- never on the wider set kulala's
     -- own README suggests (http/rest/javascript/lua), since this story's

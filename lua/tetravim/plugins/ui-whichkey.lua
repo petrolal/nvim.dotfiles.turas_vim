@@ -6,17 +6,6 @@ return {
     event = "VeryLazy",
     opts = function(_, opts)
       opts.preset = "helix"
-      -- The "helix" preset caps the popup at height.max = 0.75 and
-      -- width.max = 60. With this many top-level leader groups, that cap
-      -- is too small: on an 80x24 terminal, the list overflows and later
-      -- groups (e.g. "windows", "buffer") get silently cut off below the
-      -- fold instead of scrolling into view, making them look like they
-      -- vanished. Raise both caps so the whole group list fits on-screen
-      -- while keeping the preset's bottom-right, rounded-border layout.
-      opts.win = {
-        height = { min = 4, max = 0.9 },
-        width = { min = 30, max = 80 },
-      }
       opts.spec = opts.spec or {}
       vim.list_extend(opts.spec, {
         { "<leader>c", group = "code/lsp", icon = "󰅍 " },
@@ -32,11 +21,16 @@ return {
         -- diffview buffers only -- see lua/tetravim/plugins/tools-diffview.lua.
         { "<leader>gc", group = "conflict/compare", icon = " " },
         { "<leader>gr", group = "git review", icon = "󰊢 " },
-        { "<leader>o", group = "devops/infra", icon = "󱁢 " },
+        -- <leader>o (devops/infra) and its five subgroups come from
+        -- devops.whichkey_spec() lower down -- the single source of truth.
         { "<leader>d", group = "debug/dap", icon = "󰃤 " },
-        { "<leader>D", group = "database", icon = "󰆼 " },
-        { "<leader>H", group = "http", icon = "󰖟 " },
-        { "<leader>G", group = "grpc/proto", icon = "󱅥 " },
+        -- API & data-service clients. These were three separate Shift-prefixed
+        -- top-level groups (<leader>D / <leader>H / <leader>G) that collided
+        -- with <leader>d and <leader>g; folded under one lowercase <leader>a.
+        { "<leader>a", group = "api/data", icon = "󰖟 " },
+        { "<leader>ad", group = "database", icon = "󰆼 " },
+        { "<leader>ah", group = "http", icon = "󰖟 " },
+        { "<leader>ag", group = "grpc/proto", icon = "󱅥 " },
         { "<leader>t", group = "test runner", icon = "󰙨 " },
         { "<leader>x", group = "quality/security", icon = "󰒃 " },
         { "<leader>xd", group = "diagnostics", icon = "󰒡 " },
@@ -49,14 +43,12 @@ return {
         { "<leader>q", group = "quit/session", icon = "󰗼 " },
       })
 
-      -- Category ordering for the <leader>c ("code/lsp") popup. which-key v3
-      -- rejects a user-supplied `order` field on a mapping spec (it is an
-      -- internal Node attribute), so the flat keymap list is instead clustered
-      -- into visual blocks -- Actions / Refactor / Docs / Format / Diagnostics
-      -- / CodeLens / Navigate -- by a custom sorter injected into `opts.sort`
-      -- below. These entries only attach a per-key `desc` + category icon; the
-      -- keymaps themselves stay defined where they are (core/keymaps.lua,
-      -- editor-outline.lua, editor-docgen.lua, util/extract.lua).
+      -- Per-key `desc` + category icon for the <leader>c ("code/lsp") popup.
+      -- These entries only annotate keys defined elsewhere (core/keymaps.lua,
+      -- editor-outline.lua, editor-docgen.lua, util/extract.lua); which-key
+      -- orders them with its default sort (alphanum within the group). The
+      -- "-- Actions / Refactor / ..." banners below are reading aids for this
+      -- source list, not a runtime grouping.
       vim.list_extend(opts.spec, {
         -- Actions --------------------------------------------------------
         { "<leader>ca", desc = "Code Action", icon = "󰌵 " },
@@ -81,39 +73,6 @@ return {
         { "<leader>cl", desc = "Lsp Info", icon = "󰋽 " },
       })
 
-      -- Rank map (keyed by the final key after <leader>c) that drives the
-      -- category clustering. Buffer-local Java/Kotlin extraction keys
-      -- (<leader>ce/cm/cv/ci) get Refactor-band ranks here too so they order
-      -- sensibly within the "local" cluster; <leader>cc is Run Codelens
-      -- globally / Extract Constant buffer-locally -- same key, one rank.
-      -- stylua: ignore
-      local c_rank = {
-        a = 10, A = 11, o = 12,                          -- Actions
-        r = 20, R = 21, e = 22, m = 23, v = 24, i = 25,  -- Refactor
-        g = 30, G = 31,                                  -- Docs
-        f = 40, F = 41,                                  -- Format
-        d = 50,                                          -- Diagnostics
-        c = 60, C = 61,                                  -- CodeLens
-        s = 70, l = 71,                                  -- Navigate / Info
-      }
-      -- Custom which-key sorter: returns a category rank for the direct
-      -- children of the <leader>c group and a constant (0) for every other
-      -- key, so it is a no-op tie in all other popups and leaves their sort
-      -- untouched. Slotted after "local"/"group" so buffer-local keys still
-      -- float first and subgroups (<leader>cj*, <leader>cn*) still sink last.
-      local function c_category(item)
-        local p = item.parent
-        if not p or p.key ~= "c" then
-          return 0
-        end
-        local gp = p.parent -- the <leader> node
-        if not gp or not gp.parent or gp.parent.parent ~= nil then
-          return 0
-        end
-        return c_rank[item.key] or 900
-      end
-      opts.sort = { "local", "order", "group", c_category, "alphanum", "mod" }
-
       -- Per-language <leader>c* subgroups (Maven/Gradle, Terraform,
       -- Ansible, Docker (<leader>cD to avoid the global <leader>cd
       -- Line Diagnostics keymap), Helm...). These are registered with buffer = true,
@@ -122,17 +81,14 @@ return {
       -- lua/tetravim/core/lang-keymaps.lua.
       vim.list_extend(opts.spec, require("tetravim.core.lang-keymaps").whichkey_spec())
 
-      -- DevOps & Infrastructure Tooling Suite (<leader>o)
-      vim.list_extend(opts.spec, {
-        { "<leader>ot", group = "terraform/opentofu", icon = "󱁢 " },
-        { "<leader>oc", group = "cloudformation/sam", icon = "󰅟 " },
-        { "<leader>oy", group = "ansible", icon = "󰚰 " },
-        { "<leader>od", group = "docker", icon = "󰡨 " },
-        { "<leader>ok", group = "helm/k8s", icon = "󱃾 " },
-      })
+      -- DevOps & Infrastructure Tooling Suite (<leader>o). The group and its
+      -- five subgroups come from devops.whichkey_spec() -- the module that also
+      -- owns the keymaps -- so the list lives in exactly one place.
+      vim.list_extend(opts.spec, require("tetravim.core.devops").whichkey_spec())
 
-      local jvm = require("tetravim.util.jvm")
-      vim.list_extend(opts.spec, jvm.whichkey_spec())
+      -- JVM platform (<leader>j) groups, likewise sourced from the module that
+      -- owns the keymaps. jvm.setup_keymaps() no longer calls wk.add itself.
+      vim.list_extend(opts.spec, require("tetravim.util.jvm").whichkey_spec())
       return opts
     end,
   },

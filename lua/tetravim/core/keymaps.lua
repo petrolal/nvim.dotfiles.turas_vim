@@ -134,10 +134,11 @@ map("n", "<leader>wd", "<cmd>close<cr>", { desc = "Close Window" })
 map("n", "<leader>qq", "<cmd>confirm qa<cr>", { desc = "Quit Neovim (Confirm)" })
 map("n", "<leader>qQ", "<cmd>qa!<cr>", { desc = "Force Quit Neovim (No Save)" })
 
--- Database Client Keymaps (vim-dadbod UI)
-map("n", "<leader>Du", "<cmd>DBUIToggle<cr>", { desc = "Toggle Database UI" })
-map("n", "<leader>Df", "<cmd>DBUIFindBuffer<cr>", { desc = "Find DB Buffer" })
-map("n", "<leader>Da", "<cmd>DBUIAddConnection<cr>", { desc = "Add DB Connection" })
+-- Database Client Keymaps (vim-dadbod UI) -- <leader>ad, under the shared
+-- <leader>a "api/data" group (was the Shift-prefixed <leader>D).
+map("n", "<leader>adu", "<cmd>DBUIToggle<cr>", { desc = "Toggle Database UI" })
+map("n", "<leader>adf", "<cmd>DBUIFindBuffer<cr>", { desc = "Find DB Buffer" })
+map("n", "<leader>ada", "<cmd>DBUIAddConnection<cr>", { desc = "Add DB Connection" })
 
 -- HTTP Client & REST API Explorer Keymaps (kulala.nvim -- SPEC-3.2). The
 -- plugin itself is wired up in tools-http.lua; the two custom pieces this
@@ -182,10 +183,10 @@ local function tetravim_http_open_in_split(text, filetype, name_hint)
   pcall(vim.api.nvim_buf_set_name, bufnr, name_hint .. "-" .. tostring(bufnr))
 end
 
-map("n", "<leader>Hr", function()
+map("n", "<leader>ahr", function()
   if vim.bo.filetype ~= "http" then
     require("tetravim.util.ui").notify_err(
-      "Open a .http file first -- <leader>Hr only runs requests from a .http buffer"
+      "Open a .http file first -- <leader>ahr only runs requests from a .http buffer"
     )
     return
   end
@@ -202,7 +203,7 @@ map("n", "<leader>Hr", function()
   end
 end, { desc = "Run HTTP Request" })
 
-map("n", "<leader>Ho", function()
+map("n", "<leader>aho", function()
   vim.ui.input({ prompt = "OpenAPI JSON spec path: ", completion = "file" }, function(spec_path)
     if not spec_path or spec_path == "" then
       return
@@ -216,7 +217,7 @@ map("n", "<leader>Ho", function()
   end)
 end, { desc = "Generate .http from OpenAPI Spec" })
 
-map("n", "<leader>Hj", function()
+map("n", "<leader>ahj", function()
   local ui = require("tetravim.util.ui")
   local ft = vim.bo.filetype
 
@@ -225,7 +226,7 @@ map("n", "<leader>Hj", function()
   -- than shelling out to jq on request syntax.
   if ft == "http" then
     ui.notify_err(
-      "<leader>Hj filters a JSON response, not a .http source -- move to the response window or a JSON buffer first"
+      "<leader>ahj filters a JSON response, not a .http source -- move to the response window or a JSON buffer first"
     )
     return
   end
@@ -317,10 +318,10 @@ local function tetravim_grpc_build_request(addr, method)
   end)
 end
 
-map("n", "<leader>G", function()
+map("n", "<leader>agg", function()
   require("grpcui").open()
 end, { desc = "gRPC UI (grpcurl)" })
-map("n", "<leader>Gl", function()
+map("n", "<leader>agl", function()
   local grpc = require("tetravim.util.grpc")
   local ui = require("tetravim.util.ui")
   tetravim_grpc_prompt_addr(function(addr)
@@ -356,7 +357,7 @@ map("n", "<leader>Gl", function()
   end)
 end, { desc = "gRPC: List Services & Methods" })
 
-map("n", "<leader>Gm", function()
+map("n", "<leader>agm", function()
   local grpc = require("tetravim.util.grpc")
   local default_symbol = vim.fn.expand("<cword>")
   vim.ui.input({ prompt = "gRPC symbol to describe: ", default = default_symbol }, function(symbol)
@@ -371,7 +372,7 @@ map("n", "<leader>Gm", function()
   end)
 end, { desc = "gRPC: Describe Symbol" })
 
-map("n", "<leader>Gi", function()
+map("n", "<leader>agi", function()
   vim.ui.input({ prompt = "gRPC method (pkg.Service/Method): " }, function(method)
     if not method or vim.trim(method) == "" then
       return
@@ -382,10 +383,10 @@ map("n", "<leader>Gi", function()
   end)
 end, { desc = "gRPC: Generate Request Skeleton" })
 
-map("n", "<leader>Gf", function()
+map("n", "<leader>agf", function()
   local ui = require("tetravim.util.ui")
   if vim.bo.filetype ~= "proto" then
-    ui.notify_err("<leader>Gf formats a .proto buffer -- open one first")
+    ui.notify_err("<leader>agf formats a .proto buffer -- open one first")
     return
   end
   local ok, conform = pcall(require, "conform")

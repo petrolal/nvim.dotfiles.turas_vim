@@ -370,12 +370,12 @@ function M.check()
   local http_tools = {
     {
       name = "jq",
-      desc = "jq JSON processor (required for the <leader>Hj response-filtering keymap)",
+      desc = "jq JSON processor (required for the <leader>ahj response-filtering keymap)",
       install = "Install via apt install jq / brew install jq / pacman -S jq",
     },
     {
       name = "curl",
-      desc = "curl (kulala.nvim's request backend -- required for <leader>Hr to execute .http requests)",
+      desc = "curl (kulala.nvim's request backend -- required for <leader>ahr to execute .http requests)",
       install = "Install via apt install curl / brew install curl",
     },
   }
@@ -400,13 +400,13 @@ function M.check()
   local grpc_tools = {
     {
       name = "grpcurl",
-      desc = "grpcurl (required for the <leader>G list/describe/invoke keymaps)",
+      desc = "grpcurl (required for the <leader>ag list/describe/invoke keymaps)",
       install = "Install via :MasonInstall grpcurl / brew install grpcurl / "
         .. "go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest",
     },
     {
       name = "buf",
-      desc = "buf (the `proto` conform formatter -- <leader>Gf / format-on-save)",
+      desc = "buf (the `proto` conform formatter -- <leader>agf / format-on-save)",
       install = "Install via :MasonInstall buf / brew install bufbuild/buf/buf",
     },
     {

@@ -394,8 +394,7 @@ function M.setup_keymaps(bufnr, lang_label)
 
   -- Annotate these buffer-local keys in the <leader>c ("code/lsp") which-key
   -- popup with the Refactor-band icon. They float to the top of the popup via
-  -- which-key's "local" sorter and are slotted into the Refactor band by the
-  -- custom category sorter in plugins/ui-whichkey.lua (ranks 22-25).
+  -- which-key's built-in "local" sorter (buffer-local keys before global).
   pcall(function()
     require("which-key").add({
       { "<leader>ce", buffer = bufnr, icon = "󰆧 " },

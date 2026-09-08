@@ -57,7 +57,7 @@ local ok, err = pcall(function()
   end
 
   local wk_src = io.open('lua/tetravim/plugins/ui-whichkey.lua', 'r'):read('*a')
-  assert(wk_src:match('\"<leader>G\"'), 'ui-whichkey.lua must register the <leader>G group')
+  assert(wk_src:match('\"<leader>ag\"'), 'ui-whichkey.lua must register the <leader>ag group')
 end)
 if not ok then
   io.stderr:write('FAIL: ' .. tostring(err) .. '\n')
@@ -216,7 +216,7 @@ else
 end
 " -c "qa!"
 
-echo "[8/9] Functional: <leader>G keymaps registered; health section present; ftplugin/proto.lua applies..."
+echo "[8/9] Functional: <leader>ag keymaps registered; health section present; ftplugin/proto.lua applies..."
 nvim -u init.lua --headless -c "edit $FIXTURE_ROOT/scratch.proto" -c "lua
 local ok, err = pcall(function()
   require('tetravim.core.keymaps')
@@ -225,7 +225,7 @@ local ok, err = pcall(function()
     for _, m in ipairs(maps) do if m.lhs:match(suffix .. '\$') then return m end end
     return nil
   end
-  for _, s in ipairs({ 'Gl', 'Gm', 'Gi', 'Gf' }) do
+  for _, s in ipairs({ 'agl', 'agm', 'agi', 'agf' }) do
     assert(find(s), '<leader>' .. s .. ' keymap missing')
   end
 
@@ -256,7 +256,7 @@ if not ok then
   io.stderr:write('FAIL: ' .. tostring(err) .. '\n')
   vim.cmd('cquit 1')
 else
-  print('OK: <leader>G keymaps, health section, ftplugin/proto.lua all in place')
+  print('OK: <leader>ag keymaps, health section, ftplugin/proto.lua all in place')
 end
 " -c "qa!"
 
@@ -275,7 +275,7 @@ if [ "$BUF_AVAILABLE" -eq 1 ]; then
   if not ok then io.stderr:write('FAIL: buf format: ' .. tostring(err) .. '\n') vim.cmd('cquit 1') else print('  OK: conform ran buf on a .proto buffer') end
   " -c "qa!"
 else
-  echo "  SKIP: buf not installed -- <leader>Gf / format-on-save not exercised (conform no-ops without it)."
+  echo "  SKIP: buf not installed -- <leader>agf / format-on-save not exercised (conform no-ops without it)."
 fi
 if [ "$PROTOLS_AVAILABLE" -eq 1 ]; then
   echo "  OK: protols present (LSP attach verified manually per the Verification section)"
@@ -287,6 +287,6 @@ echo ""
 echo "gRPC & Protobufs Integration (SPEC-3.4) smoke test PASSED."
 echo ""
 echo "NOT covered here (needs a live reflection-enabled gRPC server): the"
-echo "<leader>Gl service/method picker walk and an end-to-end <leader>Gi ->"
+echo "<leader>agl service/method picker walk and an end-to-end <leader>agi ->"
 echo "<CR> invoke against a real server -- verify manually per spec-3-4's"
 echo "Verification section."
