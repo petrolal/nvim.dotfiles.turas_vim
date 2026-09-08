@@ -48,6 +48,72 @@ return {
         { "<leader>m", group = "marks/bookmarks", icon = "󰃀 " },
         { "<leader>q", group = "quit/session", icon = "󰗼 " },
       })
+
+      -- Category ordering for the <leader>c ("code/lsp") popup. which-key v3
+      -- rejects a user-supplied `order` field on a mapping spec (it is an
+      -- internal Node attribute), so the flat keymap list is instead clustered
+      -- into visual blocks -- Actions / Refactor / Docs / Format / Diagnostics
+      -- / CodeLens / Navigate -- by a custom sorter injected into `opts.sort`
+      -- below. These entries only attach a per-key `desc` + category icon; the
+      -- keymaps themselves stay defined where they are (core/keymaps.lua,
+      -- editor-outline.lua, editor-docgen.lua, util/extract.lua).
+      vim.list_extend(opts.spec, {
+        -- Actions --------------------------------------------------------
+        { "<leader>ca", desc = "Code Action", icon = "󰌵 " },
+        { "<leader>cA", desc = "Source Action", icon = "󰌵 " },
+        { "<leader>co", desc = "Organize Imports", icon = "󰗧 " },
+        -- Refactor -----------------------------------------------------
+        { "<leader>cr", desc = "Rename Symbol", icon = "󰑕 " },
+        { "<leader>cR", desc = "Rename File", icon = "󰑕 " },
+        -- Docs -------------------------------------------------------
+        { "<leader>cg", desc = "Generate Doc (function)", icon = "󰈙 " },
+        { "<leader>cG", desc = "Generate Doc (class/type)", icon = "󰈙 " },
+        -- Format ---------------------------------------------------
+        { "<leader>cf", desc = "Format", icon = "󰉢 " },
+        { "<leader>cF", desc = "Format Injected Langs", icon = "󰉢 " },
+        -- Diagnostics ------------------------------------------------
+        { "<leader>cd", desc = "Line Diagnostics", icon = "󰒡 " },
+        -- CodeLens -------------------------------------------------
+        { "<leader>cc", desc = "Run Codelens", icon = "󰊕 " },
+        { "<leader>cC", desc = "Refresh & Display Codelens", icon = "󰊕 " },
+        -- Navigate / Info ------------------------------------------
+        { "<leader>cs", desc = "Symbols Outline (Structure)", icon = "󰙅 " },
+        { "<leader>cl", desc = "Lsp Info", icon = "󰋽 " },
+      })
+
+      -- Rank map (keyed by the final key after <leader>c) that drives the
+      -- category clustering. Buffer-local Java/Kotlin extraction keys
+      -- (<leader>ce/cm/cv/ci) get Refactor-band ranks here too so they order
+      -- sensibly within the "local" cluster; <leader>cc is Run Codelens
+      -- globally / Extract Constant buffer-locally -- same key, one rank.
+      -- stylua: ignore
+      local c_rank = {
+        a = 10, A = 11, o = 12,                          -- Actions
+        r = 20, R = 21, e = 22, m = 23, v = 24, i = 25,  -- Refactor
+        g = 30, G = 31,                                  -- Docs
+        f = 40, F = 41,                                  -- Format
+        d = 50,                                          -- Diagnostics
+        c = 60, C = 61,                                  -- CodeLens
+        s = 70, l = 71,                                  -- Navigate / Info
+      }
+      -- Custom which-key sorter: returns a category rank for the direct
+      -- children of the <leader>c group and a constant (0) for every other
+      -- key, so it is a no-op tie in all other popups and leaves their sort
+      -- untouched. Slotted after "local"/"group" so buffer-local keys still
+      -- float first and subgroups (<leader>cj*, <leader>cn*) still sink last.
+      local function c_category(item)
+        local p = item.parent
+        if not p or p.key ~= "c" then
+          return 0
+        end
+        local gp = p.parent -- the <leader> node
+        if not gp or not gp.parent or gp.parent.parent ~= nil then
+          return 0
+        end
+        return c_rank[item.key] or 900
+      end
+      opts.sort = { "local", "order", "group", c_category, "alphanum", "mod" }
+
       -- Per-language <leader>c* subgroups (Maven/Gradle, Terraform,
       -- Ansible, Docker (<leader>cD to avoid the global <leader>cd
       -- Line Diagnostics keymap), Helm...). These are registered with buffer = true,

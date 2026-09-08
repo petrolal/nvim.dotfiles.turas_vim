@@ -391,6 +391,20 @@ function M.setup_keymaps(bufnr, lang_label)
   map("v", "<leader>cc", function()
     require("tetravim.util.extract").extract_constant(true)
   end, "Extract Constant")
+
+  -- Annotate these buffer-local keys in the <leader>c ("code/lsp") which-key
+  -- popup with the Refactor-band icon. They float to the top of the popup via
+  -- which-key's "local" sorter and are slotted into the Refactor band by the
+  -- custom category sorter in plugins/ui-whichkey.lua (ranks 22-25).
+  pcall(function()
+    require("which-key").add({
+      { "<leader>ce", buffer = bufnr, icon = "󰆧 " },
+      { "<leader>cm", buffer = bufnr, icon = "󰆧 " },
+      { "<leader>cv", buffer = bufnr, icon = "󰆧 " },
+      { "<leader>ci", buffer = bufnr, icon = "󰆧 " },
+      { "<leader>cc", buffer = bufnr, icon = "󰆧 " },
+    })
+  end)
 end
 
 return M
