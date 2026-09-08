@@ -37,6 +37,8 @@ bash scripts/validate-http.sh          # kulala HTTP client + OpenAPI
 bash scripts/validate-dap-jvm.sh       # JVM DAP debugger
 bash scripts/validate-devops.sh        # Terraform/CFN/Ansible root discovery
 bash scripts/validate-filetemplate.sh  # "New File from Template" (IDEA-style New)
+bash scripts/validate-completion.sh    # nvim-cmp + LuaSnip IntelliSense wiring
+bash scripts/validate-jvm-frameworks.sh # Spring Boot / Quarkus / MicroProfile config LSP wiring
 # ...see scripts/ for the rest
 
 # Lua test suite (plenary busted)
@@ -72,7 +74,7 @@ file returns a lazy.nvim spec (single spec table or a list of them). `defaults.l
 | --- | --- |
 | `lua/tetravim/core/` | Editor bootstrap: options, global keymaps, autocmds, diagnostics, health JSON, devops keymap engine, `lang-keymaps` |
 | `lua/tetravim/plugins/` | One lazy.nvim spec file per concern. Prefixes: `lsp-*`, `tools-*`, `editor-*`, `ui-*`, `cloud-*`, `core-*` |
-| `lua/tetravim/util/` | Pure Lua logic modules (`jvm`, `spring`, `refactor`, `extract`, `filetemplate`, `db`, `http`, `grpc`, `cve`, `sonar`, `forge`, `lsp_async`, `lsp_resilience`, `format`, `git`, `maven`, `gradle`, …). Keymaps call into these; business logic lives here, not in the keymap files |
+| `lua/tetravim/util/` | Pure Lua logic modules (`jvm`, `spring`, `refactor`, `extract`, `filetemplate`, `db`, `http`, `grpc`, `cve`, `sonar`, `forge`, `lsp_async`, `lsp_resilience`, `lsp_capabilities`, `format`, `git`, `maven`, `gradle`, …). Keymaps call into these; business logic lives here, not in the keymap files |
 | `lua/tetravim/theme/` | `tetris.lua` = canonical palette + highlight table; `init.lua` = loader/persistence shim |
 | `colors/tetravim.lua` | `:colorscheme tetravim` entry point |
 | `lua/tetravim/tests/` | `*_spec.lua` plenary busted specs |
@@ -106,6 +108,47 @@ only show keys relevant to the current buffer:
 Java is special-cased through `nvim-jdtls` in `ftplugin/java.lua` (bundles
 java-debug/java-test, Spring DAP, workspace under `stdpath("cache")/jdtls/`); Scala
 uses `nvim-metals`; Kotlin uses `kotlin_language_server`.
+
+JVM framework config intelligence (`application.properties` / `application.yml` /
+`microprofile-config.properties` completion, `@ConfigurationProperties` /
+`@ConfigProperty` metadata, Spring symbol nav, Qute templates):
+
+- **Spring Boot** — `plugins/lsp-spring-boot.lua` drives `JavaHello/spring-boot.nvim`
+  over the VMware Spring Boot LS (Mason package `vscode-spring-boot-tools`, in
+  `tools-mason.lua` `ensure_installed`). Value data comes from
+  `spring-configuration-metadata.json` the LS harvests from the project + its jars,
+  not SchemaStore.
+- **Quarkus / MicroProfile** — `plugins/lsp-quarkus.lua` drives
+  `JavaHello/quarkus.nvim` + `JavaHello/microprofile.nvim` (lsp4mp + Qute LS). These
+  ship only inside Red Hat's `vscode-quarkus` / `vscode-microprofile` `.vsix`
+  bundles — **not in Mason** — so `scripts/fetch-jvm-lsp-jars.sh` downloads them
+  from Open VSX into `$TETRAVIM_JVM_LSP_DIR` (default
+  `stdpath("data")/tetravim/jvm-lsp`, layout `quarkus/{server,jars}` +
+  `microprofile/{server,jars}`). The spec loads but stays **dormant** (no server
+  spawned) until those jars exist; each server is a separate ~1 GiB JVM on top of
+  jdtls, so activation is opt-in. The three provisioning scripts
+  (`bootstrap.sh`, `scripts/bootstrap.sh`, `scripts/headless-setup.sh`) call the
+  fetch script best-effort.
+- **Micronaut** — intentionally **unsupported**: no viable Neovim language server
+  exists. Do not add one.
+
+`util/jvm_frameworks` is the path resolver + readiness probe API
+(`dir`, `java_cmd`, `quarkus_paths`, `microprofile_paths`, `quarkus_ready`,
+`spring_boot_ls_jar`, `spring_boot_ready`) used by both plugin specs,
+`ftplugin/java.lua` (folds each module's `java_extensions()` into the jdtls
+`bundles`) and the `:checkhealth tetravim` "JVM Framework Config LSP" section.
+`scripts/validate-jvm-frameworks.sh` + `tests/jvm_frameworks_spec.lua` cover it.
+
+Completion capabilities: `util/lsp_capabilities.make()` is the one source of truth
+for the `capabilities` table every server starts with — it folds
+`cmp_nvim_lsp.default_capabilities()` (extended completion-item / snippet / resolve
+support) onto the 0.11 base and degrades gracefully when nvim-cmp isn't loaded.
+`lsp-core.lua` applies it once via `vim.lsp.config("*", { capabilities })` (covers
+every `opts.servers` entry) plus the lspconfig fallback; `ftplugin/java.lua` and
+`lsp-scala.lua` inject the same table on their own start paths. The completion
+front-end (nvim-cmp + LuaSnip + friendly-snippets + `cmp-nvim-lsp`/`-buffer`/
+`-path`/`-cmdline`) lives in `plugins/editor-completion.lua`; SQL buffers layer
+`vim-dadbod-completion` on top buffer-locally via `tools-dadbod.lua`.
 
 Resilience layer:
 - `util/lsp_resilience` — bounds the JDTLS JVM heap (`apply_memory_limit`) and

@@ -66,6 +66,15 @@ else
 	warn "Mason tools install failed – you may need to run :MasonToolsInstall manually"
 fi
 
+# Quarkus / MicroProfile language-server jars (not in Mason -- pulled from Open
+# VSX). Best-effort: the script always exits 0, and Spring Boot / jdtls are
+# unaffected if it fails.
+if bash "$REPO_DIR/scripts/fetch-jvm-lsp-jars.sh"; then
+	pass "Quarkus / MicroProfile language servers fetched"
+else
+	warn "Quarkus / MicroProfile jar fetch skipped -- run scripts/fetch-jvm-lsp-jars.sh later"
+fi
+
 # ============================================================================
 # 2. Node.js provider & npm tools
 #    - neovim npm package  -> vim.provider Node.js

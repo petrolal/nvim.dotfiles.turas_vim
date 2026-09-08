@@ -41,10 +41,10 @@ fi
 log "Neovim:  $(nvim --version | head -n 1)"
 log "Config:  $INIT_LUA"
 
-log "1/4  Syncing plugins (Lazy)..."
+log "1/5  Syncing plugins (Lazy)..."
 nvim --headless -u "$INIT_LUA" "+Lazy! sync" "+qa"
 
-log "2/4  Installing Mason tool-chain..."
+log "2/5  Installing Mason tool-chain..."
 if nvim --headless -u "$INIT_LUA" "+MasonToolsInstall" "+qa!"; then
 	log "     Mason tools installed."
 else
@@ -52,7 +52,15 @@ else
 	DEGRADED+=("Mason tool-chain")
 fi
 
-log "3/4  Installing Tree-sitter parsers..."
+log "3/5  Fetching Quarkus / MicroProfile language-server jars (Open VSX)..."
+if bash "$SCRIPT_DIR/scripts/fetch-jvm-lsp-jars.sh"; then
+	log "     Quarkus / MicroProfile jars in place (or already current)."
+else
+	log "     WARNING: fetch-jvm-lsp-jars.sh reported errors -- re-run it later to enable Quarkus/MicroProfile."
+	DEGRADED+=("Quarkus/MicroProfile language servers")
+fi
+
+log "4/5  Installing Tree-sitter parsers..."
 if nvim --headless -u "$INIT_LUA" \
 	-c "Lazy! load nvim-treesitter" \
 	-c "lua require('nvim-treesitter.install').install({ 'java', 'kotlin', 'scala', 'lua', 'regex' }):wait(300000)" \
@@ -63,7 +71,7 @@ else
 	DEGRADED+=("Tree-sitter parsers")
 fi
 
-log "4/4  Health snapshot (machine-readable JSON):"
+log "5/5  Health snapshot (machine-readable JSON):"
 nvim --headless -u "$INIT_LUA" \
 	-c "lua io.write(require('tetravim.core.health').json() .. '\n')" \
 	-c "qa!"

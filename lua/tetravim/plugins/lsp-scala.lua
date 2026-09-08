@@ -16,6 +16,11 @@ return {
     opts = function()
       local metals_config = require("metals").bare_config()
 
+      -- Shared cmp-nvim-lsp completion capabilities (same table lsp-core.lua
+      -- and ftplugin/java.lua use) so Metals returns snippet completions and
+      -- resolvable documentation for the popup.
+      metals_config.capabilities = require("tetravim.util.lsp_capabilities").make()
+
       metals_config.on_attach = function(client, bufnr)
         -- Mirrors jdtls.setup_dap({ hotcodereplace = "auto" }) in
         -- ftplugin/java.lua: registers dap.adapters.scala and

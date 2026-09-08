@@ -28,7 +28,18 @@ return {
       servers = {},
     },
     config = function(_, opts)
+      -- Shared capabilities table (cmp-nvim-lsp extended completion support +
+      -- native fold hints). This is what turns on real IntelliSense -- servers
+      -- only emit snippet edits / resolvable docs when the client claims to
+      -- understand them. jdtls (ftplugin/java.lua) and metals (lsp-scala.lua)
+      -- inject the same table on their own start paths.
+      local capabilities = require("tetravim.util.lsp_capabilities").make()
+
       if vim.lsp.config and vim.lsp.enable then
+        -- 0.11: a "*" config is merged into every named server config, so one
+        -- assignment covers lua_ls, kotlin_language_server, html, cssls, ts_ls,
+        -- pyright/ruff, yaml, terraform, and everything else routed here.
+        vim.lsp.config("*", { capabilities = capabilities })
         for server, server_opts in pairs(opts.servers or {}) do
           vim.lsp.config(server, server_opts or {})
           vim.lsp.enable(server)
@@ -37,7 +48,9 @@ return {
         local lspconfig = require("lspconfig")
         for server, server_opts in pairs(opts.servers or {}) do
           if lspconfig[server] then
-            lspconfig[server].setup(server_opts or {})
+            lspconfig[server].setup(
+              vim.tbl_deep_extend("keep", server_opts or {}, { capabilities = vim.deepcopy(capabilities) })
+            )
           end
         end
       end

@@ -542,6 +542,7 @@ function M.highlights()
     TelescopeMultiSelection = { fg = p.cyan },
 
     -- nvim-cmp
+    CmpGhostText = { fg = p.comment, italic = true },
     CmpItemAbbr = { fg = p.fg },
     CmpItemAbbrDeprecated = { fg = p.gray, strikethrough = true },
     CmpItemAbbrMatch = { fg = p.yellow, bold = true },

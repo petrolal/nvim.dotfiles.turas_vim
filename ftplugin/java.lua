@@ -43,6 +43,20 @@ if vim.fn.isdirectory(decompiler_root) == 1 then
   end
 end
 
+-- Spring Boot / Quarkus / MicroProfile JDT extensions. Each `java_extensions()`
+-- returns {} when its plugin or backing jars are absent (see lsp-spring-boot.lua
+-- / lsp-quarkus.lua), so on a machine without the framework tooling this whole
+-- block is a no-op. With the jars present, jdtls gains Spring symbol indexing,
+-- `@ConfigurationProperties` / `@ConfigProperty` metadata and Qute Java support.
+for _, mod in ipairs({ "spring_boot", "microprofile", "quarkus" }) do
+  local ext_ok, ext = pcall(function()
+    return require(mod).java_extensions()
+  end)
+  if ext_ok and type(ext) == "table" and #ext > 0 then
+    vim.list_extend(bundles, ext)
+  end
+end
+
 local opts = {}
 local lazy_ok, lazy_config = pcall(require, "lazy.core.config")
 if lazy_ok and lazy_config and lazy_config.spec and lazy_config.spec.plugins["nvim-jdtls"] then
@@ -102,6 +116,10 @@ local function make_config()
     cmd = cmd,
     root_dir = root_dir,
     settings = opts.settings,
+    -- Shared cmp-nvim-lsp completion capabilities (same table lsp-core.lua
+    -- gives every other server) so jdtls emits snippet edits, resolvable
+    -- Javadoc and import text-edits for the completion popup.
+    capabilities = require("tetravim.util.lsp_capabilities").make(),
     on_exit = resilience.make_on_exit("jdtls", function()
       jdtls.start_or_attach(make_config())
     end),

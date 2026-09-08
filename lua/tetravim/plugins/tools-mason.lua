@@ -29,6 +29,9 @@ local ensure_installed = {
   "jdtls",
   "java-debug-adapter",
   "java-test",
+  -- Spring Boot Language Server (application.properties / application.yml
+  -- completion + Spring symbol navigation) -- see lsp-spring-boot.lua.
+  "vscode-spring-boot-tools",
   "kotlin-language-server",
   "kotlin-debug-adapter",
   "ktlint",

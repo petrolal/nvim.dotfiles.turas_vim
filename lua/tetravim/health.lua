@@ -133,6 +133,58 @@ function M.check()
     vim.health.info("Spring Boot / JVM project root: not detected in current directory")
   end
 
+  vim.health.start("TetraVim JVM Framework Config LSP (Spring Boot / Quarkus / MicroProfile)")
+
+  local frameworks = require("tetravim.util.jvm_frameworks")
+
+  -- Spring Boot LS (Mason: vscode-spring-boot-tools) --------------------------
+  if pcall(require, "spring_boot") then
+    vim.health.ok("spring-boot.nvim: resolvable")
+  else
+    vim.health.warn("spring-boot.nvim: not resolvable -- run :Lazy sync")
+  end
+
+  local sb_jar = frameworks.spring_boot_ls_jar()
+  if sb_jar then
+    vim.health.ok("Spring Boot Language Server jar: " .. sb_jar)
+  else
+    vim.health.warn(
+      "Spring Boot Language Server jar: NOT found. Suggestion: :MasonInstall vscode-spring-boot-tools "
+        .. "(application.properties / application.yml completion is unavailable until then)"
+    )
+  end
+
+  -- Quarkus + MicroProfile (Open VSX .vsix, fetched by scripts/fetch-jvm-lsp-jars.sh)
+  for _, mod in ipairs({ "quarkus", "microprofile" }) do
+    if pcall(require, mod) then
+      vim.health.ok(mod .. ".nvim: resolvable")
+    else
+      vim.health.warn(mod .. ".nvim: not resolvable -- run :Lazy sync")
+    end
+  end
+
+  if frameworks.quarkus_ready() then
+    vim.health.ok(
+      "Quarkus / lsp4mp jars: installed under "
+        .. frameworks.dir()
+        .. " (application.properties / .yml + quarkus.* + Qute completion active)"
+    )
+  else
+    vim.health.info(
+      "Quarkus / lsp4mp jars: NOT installed (optional). Suggestion: run "
+        .. "'bash scripts/fetch-jvm-lsp-jars.sh' to download the Red Hat vscode-quarkus / "
+        .. "vscode-microprofile bundles from Open VSX into "
+        .. frameworks.dir()
+        .. ". Each adds a ~1 GiB JVM language server."
+    )
+  end
+
+  if frameworks.java_cmd() then
+    vim.health.ok("JVM framework servers will launch with: " .. frameworks.java_cmd())
+  else
+    vim.health.info("JVM framework servers will launch with 'java' on $PATH ($JAVA_HOME not resolved to a JDK 21)")
+  end
+
   vim.health.start("AWS CloudFormation & SAM DevOps Tooling (Story 8.2)")
 
   local cfn_tools = {
@@ -249,6 +301,47 @@ function M.check()
     vim.health.ok("glab: installed (optional -- 'glab ci lint' server-side pipeline validation)")
   else
     vim.health.info("glab: NOT found on $PATH (optional -- enables server-side 'glab ci lint' validation)")
+  end
+
+  vim.health.start("TetraVim Autocompletion / IntelliSense (nvim-cmp + LuaSnip)")
+
+  local cmp_ok = pcall(require, "cmp")
+  if cmp_ok then
+    vim.health.ok("nvim-cmp: resolvable (open a buffer / enter insert mode to load it)")
+  else
+    vim.health.warn("nvim-cmp: not resolvable -- enter insert mode once to lazy-load it, or run :Lazy sync")
+  end
+
+  local cmp_lsp_ok = pcall(require, "cmp_nvim_lsp")
+  if cmp_lsp_ok then
+    vim.health.ok("cmp-nvim-lsp: resolvable -- extended completion capabilities advertised to every LSP server")
+  else
+    vim.health.warn("cmp-nvim-lsp: not resolvable -- LSP completion falls back to plain capabilities. Run :Lazy sync")
+  end
+
+  local luasnip_ok = pcall(require, "luasnip")
+  if luasnip_ok then
+    local ok_ls, ls = pcall(require, "luasnip")
+    local ft_count = 0
+    if ok_ls and type(ls.get_snippets) == "function" then
+      local all = ls.get_snippets() or {}
+      for _ in pairs(all) do
+        ft_count = ft_count + 1
+      end
+    end
+    if ft_count > 0 then
+      vim.health.ok(string.format("LuaSnip: resolvable -- snippets loaded for %d filetype(s)", ft_count))
+    else
+      vim.health.ok("LuaSnip: resolvable (friendly-snippets load lazily per filetype)")
+    end
+  else
+    vim.health.warn("LuaSnip: not resolvable -- snippet expansion unavailable. Run :Lazy sync")
+  end
+
+  for _, dep in ipairs({ "cmp_luasnip", "cmp_buffer", "cmp_path" }) do
+    if not pcall(require, dep) then
+      vim.health.info(dep:gsub("_", "-") .. ": not yet loaded (loads with nvim-cmp on InsertEnter)")
+    end
   end
 
   vim.health.start("TetraVim Embedded Database Explorer (SPEC-3.1)")
