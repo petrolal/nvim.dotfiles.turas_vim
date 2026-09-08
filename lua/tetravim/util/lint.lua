@@ -99,9 +99,8 @@ local extra_ready = {
 M.extra_ready = extra_ready
 
 -- Classify a YAML buffer by CI system from its path (Epic 39). GitHub workflow
--- and GitLab CI files are plain `yaml` to Neovim, so the generic `yaml` linters
--- (cfn_lint, ansible_lint) would otherwise flood them with
--- "'Resources' is a required property" noise.
+-- and GitLab CI files are plain `yaml` to Neovim; this routes them to
+-- actionlint / yamllint via `lint_ci` instead of the filetype linters.
 ---@param path string|nil
 ---@return "github"|"gitlab"|nil
 function M.ci_kind(path)
@@ -121,9 +120,25 @@ function M.ci_kind(path)
   return nil
 end
 
--- Linters that only make sense for a hand-authored CloudFormation / Ansible
--- document, never for a CI pipeline file.
-local generic_yaml_noise = { cfn_lint = true, ansible_lint = true }
+-- Linters that fire on the bare `yaml` filetype but only make sense for a
+-- specific kind of YAML document. `cfn-lint` treats every input as a
+-- CloudFormation template ("'Resources' is a required property", "Additional
+-- properties are not allowed") and `ansible-lint` as a playbook, so on an
+-- `application.yaml`, a docker-compose file or any other plain YAML they are
+-- pure noise. Each entry is a predicate: the linter only runs when the buffer
+-- actually looks like its document type (path / filetype / header sniff, shared
+-- with the `<leader>o` DevOps helpers via `core.devops`).
+---@type table<string, fun(buf: number): boolean>
+local generic_yaml_noise = {
+  cfn_lint = function(buf)
+    local ok, devops = pcall(require, "tetravim.core.devops")
+    return ok and devops.is_cloudformation_buffer(buf) or false
+  end,
+  ansible_lint = function(buf)
+    local ok, devops = pcall(require, "tetravim.core.devops")
+    return ok and devops.is_ansible_buffer(buf) or false
+  end,
+}
 
 --- Run the filetype-scoped linters for a buffer.
 ---@param buf number
@@ -141,7 +156,6 @@ function M.lint_buffer(buf, opts)
 
   local ft = vim.bo[buf].filetype
   local linters = lint.linters_by_ft[ft]
-  local on_ci = M.ci_kind(vim.api.nvim_buf_get_name(buf)) ~= nil
 
   if not linters then
     lint.try_lint()
@@ -152,7 +166,8 @@ function M.lint_buffer(buf, opts)
   for _, linter in ipairs(linters) do
     local name = type(linter) == "table" and linter.cmd or linter
     local ready = not extra_ready[name] or extra_ready[name]()
-    if not (on_ci and generic_yaml_noise[name]) and linter_executable(name) and ready then
+    local doc_ok = not generic_yaml_noise[name] or generic_yaml_noise[name](buf)
+    if doc_ok and linter_executable(name) and ready then
       table.insert(valid, linter)
     end
   end
