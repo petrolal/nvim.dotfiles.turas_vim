@@ -121,9 +121,8 @@ map("n", "<leader>ll", "<cmd>Lazy<cr>", { desc = "Lazy Plugin Manager" })
 map("n", "<leader>lm", "<cmd>Mason<cr>", { desc = "Mason Tool Manager" })
 map("n", "<leader>lc", "<cmd>checkhealth<cr>", { desc = "Checkhealth System" })
 
--- Buffer Navigation Keymaps (<leader>b)
-map("n", "<leader>bp", "<cmd>bprevious<cr>", { desc = "Previous Buffer" })
-map("n", "<leader>bn", "<cmd>bnext<cr>", { desc = "Next Buffer" })
+-- Buffer keymaps (<leader>b) all live in one place -- the which-key `keys`
+-- spec in lua/tetravim/plugins/editor-snacks.lua (bp/bn/bd/bD/bo/bi/bb/b1-9).
 
 -- Window Management Splits & Navigation (<leader>w)
 map("n", "<leader>ws", "<cmd>split<cr>", { desc = "Split Window Horizontally" })
@@ -290,7 +289,7 @@ local function tetravim_grpc_open_request(addr, method, skeleton_text)
     grpc.invoke(addr, method, payload, function(response)
       tetravim_http_open_in_split(response, "json", "grpc-response")
     end)
-  end, { buffer = bufnr, desc = "gRPC: Invoke RPC with this payload" })
+  end, { buffer = bufnr, desc = "Invoke RPC with this payload" })
   ui.notify_info("Edit the payload, then press <CR> in this buffer to invoke " .. method)
 end
 
@@ -320,7 +319,7 @@ end
 
 map("n", "<leader>agg", function()
   require("grpcui").open()
-end, { desc = "gRPC UI (grpcurl)" })
+end, { desc = "UI (grpcurl)" })
 map("n", "<leader>agl", function()
   local grpc = require("tetravim.util.grpc")
   local ui = require("tetravim.util.ui")
@@ -355,7 +354,7 @@ map("n", "<leader>agl", function()
       end)
     end)
   end)
-end, { desc = "gRPC: List Services & Methods" })
+end, { desc = "List Services & Methods" })
 
 map("n", "<leader>agm", function()
   local grpc = require("tetravim.util.grpc")
@@ -370,7 +369,7 @@ map("n", "<leader>agm", function()
       end)
     end)
   end)
-end, { desc = "gRPC: Describe Symbol" })
+end, { desc = "Describe Symbol" })
 
 map("n", "<leader>agi", function()
   vim.ui.input({ prompt = "gRPC method (pkg.Service/Method): " }, function(method)
@@ -381,7 +380,7 @@ map("n", "<leader>agi", function()
       tetravim_grpc_build_request(addr, vim.trim(method))
     end)
   end)
-end, { desc = "gRPC: Generate Request Skeleton" })
+end, { desc = "Generate Request Skeleton" })
 
 map("n", "<leader>agf", function()
   local ui = require("tetravim.util.ui")
@@ -395,7 +394,7 @@ map("n", "<leader>agf", function()
     return
   end
   conform.format({ bufnr = 0, async = false, lsp_fallback = true })
-end, { desc = "gRPC: Format .proto Buffer (buf)" })
+end, { desc = "Format .proto Buffer (buf)" })
 
 -- Autoformat toggle (Story 34.2): <leader>uf toggles for the current
 -- buffer only, <leader>uF toggles the global default
@@ -493,11 +492,11 @@ vim.api.nvim_create_user_command("NewFromTemplate", new_file_from_template, {
 -- --- Diagnostics -----------------------------------------------------------
 map("n", "<leader>xdb", function()
   vim.diagnostic.open_float(nil, { source = true })
-end, { desc = "Diagnostics: Line (Buffer)" })
+end, { desc = "Line (Buffer)" })
 
 map("n", "<leader>xdp", function()
   vim.diagnostic.setqflist({ open = true, title = "Project diagnostics" })
-end, { desc = "Diagnostics: All Project (Quickfix)" })
+end, { desc = "All Project (Quickfix)" })
 
 -- --- Lint ----------------------------------------------------------------
 -- Buffer: lint / autofix the current file (ignores the <leader>ul autolint
@@ -507,16 +506,16 @@ end, { desc = "Diagnostics: All Project (Quickfix)" })
 -- variants rewrite files in place, then reload the affected buffers.
 map("n", "<leader>xlb", function()
   require("tetravim.util.lint").lint_now()
-end, { desc = "Lint: Check Buffer" })
+end, { desc = "Check Buffer" })
 map("n", "<leader>xlB", function()
   require("tetravim.util.lint").fix_now()
-end, { desc = "Lint: Autofix Buffer (writes file)" })
+end, { desc = "Autofix Buffer (writes file)" })
 map("n", "<leader>xlp", function()
   require("tetravim.util.lint").project_run("check")
-end, { desc = "Lint: Check All Code (Project)" })
+end, { desc = "Check All Code (Project)" })
 map("n", "<leader>xlP", function()
   require("tetravim.util.lint").project_run("fix")
-end, { desc = "Lint: Autofix All Code (Project)" })
+end, { desc = "Autofix All Code (Project)" })
 
 -- --- Sonar -------------------------------------------------------------
 -- Buffer: SonarLint analyzes java/kotlin/scala buffers automatically via the
@@ -540,11 +539,11 @@ map("n", "<leader>xsb", function()
   else
     vim.lsp.buf.code_action()
   end
-end, { desc = "Sonar: Rule Description (Buffer)" })
+end, { desc = "Rule Description (Buffer)" })
 
 map("n", "<leader>xsp", function()
   require("tetravim.util.sonar").project_scan()
-end, { desc = "Sonar: Scan Whole Project" })
+end, { desc = "Scan Whole Project" })
 
 -- --- CVE / vulnerabilities -------------------------------------------
 -- Buffer: scan the open Maven/Gradle build file and publish WARN diagnostics
@@ -589,14 +588,14 @@ map("n", "<leader>xvb", function()
       )
     )
   end)
-end, { desc = "CVE: Scan Build File (Buffer)" })
+end, { desc = "Scan Build File (Buffer)" })
 
 map("n", "<leader>xvp", function()
   require("tetravim.util.cve").project_scan()
-end, { desc = "CVE: Scan Whole Project" })
+end, { desc = "Scan Whole Project" })
 
 map("n", "<leader>xvc", function()
   local bufnr = vim.api.nvim_get_current_buf()
   require("tetravim.util.cve").clear_diagnostics(bufnr)
   require("tetravim.util.ui").notify_info("Cleared CVE diagnostics for this buffer")
-end, { desc = "CVE: Clear Scan Diagnostics" })
+end, { desc = "Clear Scan Diagnostics" })

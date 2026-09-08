@@ -107,10 +107,22 @@ function M.setup()
     end
   end
 
+  -- apply() is idempotent but not free -- for a stack that declares a
+  -- condition it runs a pom.xml/build.gradle filesystem search. FileType is
+  -- the event that actually changes which stacks a buffer owns; BufEnter
+  -- fires on every tab switch. Skip the BufEnter re-run when the buffer's
+  -- filetype has not changed since we last applied to it. The post-sync
+  -- re-application for gated stacks goes through sync_state.on_ready below,
+  -- not this autocmd, so gating still resolves without a filetype change.
   vim.api.nvim_create_autocmd({ "FileType", "BufEnter" }, {
     group = augroup,
     callback = function(args)
+      local ft = vim.bo[args.buf].filetype
+      if args.event == "BufEnter" and vim.b[args.buf].tetravim_lang_keymaps_ft == ft then
+        return
+      end
       apply(args.buf)
+      vim.b[args.buf].tetravim_lang_keymaps_ft = ft
     end,
   })
 

@@ -545,8 +545,12 @@ function M.setup_keymaps()
   end, { desc = "Spring: Detect Boot App" })
 
   map("n", "<leader>jsm", function()
-    vim.notify("Use <leader>db to explore database schemas and migrations via Dadbod UI", vim.log.levels.INFO)
-  end, { desc = "Flyway: Database Explorer" })
+    -- Migrations/schema live in the Dadbod UI explorer (also on <leader>ad).
+    local ok = pcall(vim.cmd, "DBUIToggle")
+    if not ok then
+      notify_error("vim-dadbod-ui is not available")
+    end
+  end, { desc = "Database Explorer (Dadbod)" })
 
   -- 5. Refactoring & JDTLS (<leader>jx)
   map("n", "<leader>jxo", optimize_imports_buffer, { desc = "Optimize Java/Kotlin Imports (JDTLS/LSP)" })
@@ -575,7 +579,15 @@ function M.setup_keymaps()
 
   -- 7. Dependencies (<leader>jd)
   map("n", "<leader>jdu", function()
-    vim.notify("Use <leader>jds to resync dependencies via Maven/Gradle", vim.log.levels.INFO)
+    with_jvm_project(function(tool, root)
+      if tool == "gradle" then
+        local cmd = get_build_cmd(get_gradle_cmd(root), M.offline_mode)
+        term.run_term(cmd .. " dependencyUpdates", { title = "TetraVim Gradle", cwd = root })
+      else
+        local cmd = get_build_cmd(get_mvn_cmd(root), M.offline_mode)
+        term.run_term(cmd .. " versions:display-dependency-updates", { title = "TetraVim Maven", cwd = root })
+      end
+    end)
   end, { desc = "Check Dependency Versions" })
 
   map("n", "<leader>jds", resync_dependencies, { desc = "Maven/Gradle: Resync Dependencies" })

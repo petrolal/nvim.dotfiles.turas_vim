@@ -763,58 +763,50 @@ function M.setup_keymaps(force)
     return
   end
 
-  local function safe_map(mode, lhs, rhs, opts)
-    local ok, err = pcall(vim.keymap.set, mode, lhs, rhs, opts)
-    if not ok then
-      vim.notify(
-        "Failed to register keymap " .. lhs .. ": " .. tostring(err),
-        vim.log.levels.WARN,
-        { title = "TetraVim DevOps" }
-      )
-    end
-    return ok
-  end
+  -- These are a static list of well-formed mappings registered once at
+  -- startup. vim.keymap.set does not throw for valid args, so a bad lhs/rhs
+  -- here is a bug that should surface with a stack trace, not be swallowed
+  -- into a toast -- hence a plain alias rather than a pcall wrapper.
+  local map = vim.keymap.set
 
-  -- Terraform & OpenTofu (<leader>ot)
-  safe_map("n", "<leader>oti", M.terraform_init, { desc = "Terraform: Init", silent = true })
-  safe_map("n", "<leader>otv", M.terraform_validate, { desc = "Terraform: Validate", silent = true })
-  safe_map("n", "<leader>otp", M.terraform_plan, { desc = "Terraform: Plan", silent = true })
-  safe_map("n", "<leader>ota", M.terraform_apply, { desc = "Terraform: Apply", silent = true })
-  safe_map("n", "<leader>otf", M.terraform_fmt, { desc = "Terraform: Format", silent = true })
-  safe_map("n", "<leader>otl", M.terraform_lint, { desc = "Terraform: Lint (tflint)", silent = true })
-  safe_map("n", "<leader>ots", M.terraform_security, { desc = "Terraform: Security Scan (trivy/tfsec)", silent = true })
-  safe_map("n", "<leader>oto", M.terraform_output, { desc = "Terraform: Output", silent = true })
+  -- Terraform & OpenTofu (<leader>ot). Descriptions omit a "Terraform:" prefix
+  -- -- the which-key group label already reads "terraform/opentofu".
+  map("n", "<leader>oti", M.terraform_init, { desc = "Init", silent = true })
+  map("n", "<leader>otv", M.terraform_validate, { desc = "Validate", silent = true })
+  map("n", "<leader>otp", M.terraform_plan, { desc = "Plan", silent = true })
+  map("n", "<leader>ota", M.terraform_apply, { desc = "Apply", silent = true })
+  map("n", "<leader>otf", M.terraform_fmt, { desc = "Format", silent = true })
+  map("n", "<leader>otl", M.terraform_lint, { desc = "Lint (tflint)", silent = true })
+  map("n", "<leader>ots", M.terraform_security, { desc = "Security Scan (trivy/tfsec)", silent = true })
+  map("n", "<leader>oto", M.terraform_output, { desc = "Output", silent = true })
 
-  -- AWS CloudFormation & SAM (<leader>oc)
-  safe_map("n", "<leader>ocv", M.cfn_validate, { desc = "CloudFormation: Validate Template", silent = true })
-  safe_map("n", "<leader>ocl", M.cfn_lint, { desc = "CloudFormation: Lint (cfn-lint)", silent = true })
-  safe_map("n", "<leader>ocV", M.sam_validate, { desc = "SAM: Validate", silent = true })
-  safe_map("n", "<leader>ocb", M.sam_build, { desc = "SAM: Build", silent = true })
-  safe_map("n", "<leader>oci", M.sam_local_invoke, { desc = "SAM: Local Invoke", silent = true })
-  safe_map("n", "<leader>ocr", M.sam_local_start_api, { desc = "SAM: Local Start API", silent = true })
-  safe_map(
-    "n",
-    "<leader>ocg",
-    M.cfn_guard_validate,
-    { desc = "CloudFormation: Policy Check (cfn-guard)", silent = true }
-  )
+  -- AWS CloudFormation & SAM (<leader>oc). This group fronts two distinct CLIs,
+  -- so the "CloudFormation:" / "SAM:" prefixes stay -- they disambiguate rather
+  -- than echo the group label.
+  map("n", "<leader>ocv", M.cfn_validate, { desc = "CloudFormation: Validate Template", silent = true })
+  map("n", "<leader>ocl", M.cfn_lint, { desc = "CloudFormation: Lint (cfn-lint)", silent = true })
+  map("n", "<leader>ocV", M.sam_validate, { desc = "SAM: Validate", silent = true })
+  map("n", "<leader>ocb", M.sam_build, { desc = "SAM: Build", silent = true })
+  map("n", "<leader>oci", M.sam_local_invoke, { desc = "SAM: Local Invoke", silent = true })
+  map("n", "<leader>ocr", M.sam_local_start_api, { desc = "SAM: Local Start API", silent = true })
+  map("n", "<leader>ocg", M.cfn_guard_validate, { desc = "CloudFormation: Policy Check (cfn-guard)", silent = true })
 
-  -- Ansible Automation (<leader>oy)
-  safe_map("n", "<leader>oys", M.ansible_syntax_check, { desc = "Ansible: Syntax Check", silent = true })
-  safe_map("n", "<leader>oyl", M.ansible_lint, { desc = "Ansible: Lint Playbook", silent = true })
-  safe_map("n", "<leader>oyc", M.ansible_dry_run, { desc = "Ansible: Dry Run (--check)", silent = true })
-  safe_map("n", "<leader>oyr", M.ansible_run_playbook, { desc = "Ansible: Run Playbook", silent = true })
-  safe_map("n", "<leader>oyi", M.ansible_inventory_graph, { desc = "Ansible: Inventory Graph", silent = true })
-  safe_map("n", "<leader>oyd", M.ansible_doc_lookup, { desc = "Ansible: Module Documentation", silent = true })
-  safe_map("n", "<leader>oyv", M.ansible_vault_action, { desc = "Ansible: Vault Action", silent = true })
+  -- Ansible Automation (<leader>oy) -- group label already reads "ansible".
+  map("n", "<leader>oys", M.ansible_syntax_check, { desc = "Syntax Check", silent = true })
+  map("n", "<leader>oyl", M.ansible_lint, { desc = "Lint Playbook", silent = true })
+  map("n", "<leader>oyc", M.ansible_dry_run, { desc = "Dry Run (--check)", silent = true })
+  map("n", "<leader>oyr", M.ansible_run_playbook, { desc = "Run Playbook", silent = true })
+  map("n", "<leader>oyi", M.ansible_inventory_graph, { desc = "Inventory Graph", silent = true })
+  map("n", "<leader>oyd", M.ansible_doc_lookup, { desc = "Module Documentation", silent = true })
+  map("n", "<leader>oyv", M.ansible_vault_action, { desc = "Vault Action", silent = true })
 
-  -- Docker & Containers (<leader>od)
-  safe_map("n", "<leader>odb", M.docker_build, { desc = "Docker: Build Image", silent = true })
-  safe_map("n", "<leader>odl", M.docker_lint, { desc = "Docker: Lint Dockerfile", silent = true })
+  -- Docker & Containers (<leader>od) -- group label already reads "docker".
+  map("n", "<leader>odb", M.docker_build, { desc = "Build Image", silent = true })
+  map("n", "<leader>odl", M.docker_lint, { desc = "Lint Dockerfile", silent = true })
 
-  -- Helm & Kubernetes (<leader>ok)
-  safe_map("n", "<leader>okl", M.helm_lint, { desc = "Helm: Lint Chart", silent = true })
-  safe_map("n", "<leader>okt", M.helm_template, { desc = "Helm: Render Template", silent = true })
+  -- Helm & Kubernetes (<leader>ok) -- group label already reads "helm/k8s".
+  map("n", "<leader>okl", M.helm_lint, { desc = "Lint Chart", silent = true })
+  map("n", "<leader>okt", M.helm_template, { desc = "Render Template", silent = true })
 
   M.keymaps_registered = true
 end

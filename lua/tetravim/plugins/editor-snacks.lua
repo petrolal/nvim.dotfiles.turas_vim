@@ -423,6 +423,10 @@ return {
         end,
         desc = "Delete Invisible Buffers",
       },
+      -- Sequential buffer nav. All <leader>b* ownership lives in this spec so
+      -- there is one file to look in; core/keymaps.lua no longer defines any.
+      { "<leader>bp", "<cmd>bprevious<cr>", desc = "Previous Buffer" },
+      { "<leader>bn", "<cmd>bnext<cr>", desc = "Next Buffer" },
       { "<leader>b1", "<cmd>BufferLineGoToBuffer 1<cr>", desc = "Go to Buffer 1" },
       { "<leader>b2", "<cmd>BufferLineGoToBuffer 2<cr>", desc = "Go to Buffer 2" },
       { "<leader>b3", "<cmd>BufferLineGoToBuffer 3<cr>", desc = "Go to Buffer 3" },

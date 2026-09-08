@@ -880,6 +880,56 @@ function M.check()
   else
     vim.health.info("vscode-java-decompiler: no bundle jars found. Suggestion: :Lazy sync")
   end
+
+  -- Keymap hygiene. TetraVim feeds which-key from four registration channels
+  -- (core/keymaps, core/lang-keymaps, core/devops, util/jvm) plus plugin
+  -- `keys=` specs. Nothing stops two of them claiming the same <leader>
+  -- sequence, and Neovim silently keeps only the last binding -- so a drift
+  -- like that is invisible until you press the key and get the wrong action.
+  -- Flag the one shape that IS observable at runtime: a lhs that is both a
+  -- complete mapping and a strict prefix of another mapping (e.g. a bare
+  -- <leader>G that is also the <leader>G* group prefix). That stalls for
+  -- 'timeoutlen' on every press and confuses which-key's group rendering.
+  vim.health.start("TetraVim Keymap Hygiene (leader-prefix collisions)")
+  local leader = vim.g.mapleader
+  if type(leader) ~= "string" or leader == "" then
+    leader = "\\"
+  end
+  local shadow_lines = {}
+  for _, mode in ipairs({ "n", "x", "o" }) do
+    local leader_lhs = {}
+    for _, m in ipairs(vim.api.nvim_get_keymap(mode)) do
+      local lhs = m.lhs or ""
+      if lhs:sub(1, #leader) == leader and #lhs > #leader then
+        leader_lhs[#leader_lhs + 1] = { lhs = lhs, desc = m.desc or m.rhs or "" }
+      end
+    end
+    local reported = {}
+    for _, a in ipairs(leader_lhs) do
+      if not reported[a.lhs] then
+        for _, b in ipairs(leader_lhs) do
+          if a.lhs ~= b.lhs and b.lhs:sub(1, #a.lhs) == a.lhs then
+            reported[a.lhs] = true
+            shadow_lines[#shadow_lines + 1] = string.format(
+              "[%s] %s is a full mapping (%s) and also the prefix of %s",
+              mode,
+              vim.fn.keytrans(a.lhs),
+              a.desc ~= "" and a.desc or "no desc",
+              vim.fn.keytrans(b.lhs)
+            )
+            break
+          end
+        end
+      end
+    end
+  end
+  if #shadow_lines == 0 then
+    vim.health.ok("No <leader> mapping is also a prefix of another mapping")
+  else
+    for _, line in ipairs(shadow_lines) do
+      vim.health.warn(line .. " -- pressing it stalls for 'timeoutlen'; move the action to a leaf key")
+    end
+  end
 end
 
 return M
